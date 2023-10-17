@@ -1,0 +1,72 @@
+# Those parameters are used by multiple scripts
+general:
+  pointcloud: False
+  pointcloud_samples: 3000
+  sample_distribution: [0.5, 0.5]
+  sample_sigmas: [0.1, 0.01]
+  data_path: '/data1/practical-sose23/shape-prior/dataset-combination-ifnet/'
+  split_file: '/data1/practical-sose23/shape-prior/saved_experiments/split_cervical_verse19.npz'
+
+  resolution: 128
+  model: 'ShapeNet128Vox'
+
+
+voxelize_from_nifti:
+  input: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1/'
+  output: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+
+
+create_voxel_off:
+  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  unpackbits: True
+  min: -0.5
+  max: 0.5
+
+
+rename_voxel_off:
+  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+
+
+boundary_sampling:
+  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  #specifies standard deviations of the normally distributed displacements added onto surface samples.
+  sigmas: [0.1, 0.01]
+  sample_number: 100000
+
+
+train:
+  epochs: 1500
+  batch_size: 16
+  optimizer: 'Adam'
+  dropout_probability: 0
+  adam_weight_decay: 1e-5
+
+
+generate:
+  decoder_hidden_dim: 256
+  mode: 'test'
+  retrieval_resolution: 256
+  #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
+  checkpoint: 1500
+  #choose the number of points that fit into GPU memory at once (400k for small GPU's)
+  batch_points: 1000000
+  #choose if training during inference should be enabled
+  training_during_inference: False
+
+
+voxelize:
+  #root folder of the generate.py output
+  root: '/u/home/klausen/projects/shape-prior-3/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNet128Vox/evaluation_None_@256_optimized/generation/'
+  #filename of voxelize.py output (default: surface_reconstruction.off)
+  filename: 'surface_reconstruction.off'
+
+
+convert_to_nifti:
+  #root folder of the generate.py output
+  input: '/u/home/klausen/projects/shape-prior-3/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNet128Vox/evaluation_None_@256_optimized/generation/'
+  #folder where generated nifti files will be saved
+  output: '/data1/practical-sose23/shape-prior/if-net-output/cervical-gt_bottleneck-combined-optimization1000steps-output/'
+  #unprocessed dataset folder (nifti format) of the dataset used for generate.py
+  ground_truth: '/data1/practical-sose23/shape-prior/dataset-combination-bottleneck/'
+  #should be True only for automated prediction because of the different naming scheme
+  is_prediction: False
