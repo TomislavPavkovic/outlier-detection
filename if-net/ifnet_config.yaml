@@ -12,12 +12,12 @@ general:
 
 
 voxelize_from_nifti:
-  input: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1/'
-  output: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  input: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated'
+  output: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated-ifnet'
 
 
 create_voxel_off:
-  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  root: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated-ifnet'
   unpackbits: True
   min: -0.5
   max: 0.5

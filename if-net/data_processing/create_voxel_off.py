@@ -40,7 +40,7 @@ def main(cfg: DictConfig):
             min=cfg_create_voxel_off.min,
             max=cfg_create_voxel_off.max
         ),
-        glob.glob(cfg_create_voxel_off.root + '/*/*/')
+        glob.glob(cfg_create_voxel_off.root + '/*/*/*/')
     )
 
 

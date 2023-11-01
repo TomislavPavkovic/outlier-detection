@@ -35,30 +35,15 @@ def voxelize_from_nifti(input_path, output_path):
 def main(cfg: DictConfig):
     input_path = Path(cfg.voxelize_from_nifti.input)
     output_path = Path(cfg.voxelize_from_nifti.output)
-    out_dir_exists = os.path.exists(output_path)
-    if not out_dir_exists:
+    if not os.path.exists(output_path):
         os.makedirs(output_path)
-        print("Directory %s created!" % output_path)
-
-    for folder in os.listdir(input_path):
-        sub_verse = os.path.join(input_path, folder)
-        if os.path.isdir(sub_verse):
-            sub_verse_dir = os.path.join(output_path, folder)
-            exists = os.path.exists(sub_verse_dir)
-            if not exists:
-                os.makedirs(sub_verse_dir)
-                print("Directory %s created!" % sub_verse_dir)
-            for filename in os.listdir(sub_verse):
-                crop = os.path.join(sub_verse, filename)
-                if os.path.isfile(crop):
-                    crop_dir_name = os.path.splitext(filename)[0]
-                    crop_dir_name = os.path.splitext(crop_dir_name)[0]
-                    crop_dir = os.path.join(sub_verse_dir, crop_dir_name)
-                    exists = os.path.exists(crop_dir)
-                    if not exists:
-                        os.makedirs(crop_dir)
-                        print("Directory %s created!" % crop_dir)
-                    voxelize_from_nifti(crop, crop_dir)
+    for root, dirs, files in os.walk(input_path):
+        for file in files:
+            if file.endswith(".nii.gz"):
+                file_path = os.path.join(root, file)
+                new_root = root.replace(str(input_path), str(output_path))
+                os.makedirs(new_root, exist_ok=True)
+                voxelize_from_nifti(file_path, new_root)
 
 
 if __name__ == '__main__':
