@@ -51,7 +51,7 @@ def main(cfg: DictConfig):
                 sigma=sigma,
                 sample_num=cfg_boundary_sampling.sample_number
             ),
-            glob.glob(cfg_boundary_sampling.root + '/*/*/')
+            glob.glob(cfg_boundary_sampling.root + '/*/*/*/')
         )
 
 

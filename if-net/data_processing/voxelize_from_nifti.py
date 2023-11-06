@@ -16,8 +16,7 @@ def voxelize_from_nifti(input_path, output_path):
                         return
                 
                 img = nib.load(input_path)
-                occupancies = np.array(img.dataobj)
-                print(occupancies.shape)
+                occupancies = np.array(img.dataobj).astype(int)
                 if not occupancies.any():
                         raise ValueError('No empty voxel grids allowed.')
 
@@ -27,7 +26,7 @@ def voxelize_from_nifti(input_path, output_path):
 
         except Exception as err:
                 path = os.path.normpath(input_path)
-                print('Error with {}: {}'.format(path, traceback.format_exc()))
+                print('Error with {}: {}'.format(path, err))
         print('finished {}'.format(input_path))
 
 
@@ -41,7 +40,9 @@ def main(cfg: DictConfig):
         for file in files:
             if file.endswith(".nii.gz"):
                 file_path = os.path.join(root, file)
-                new_root = root.replace(str(input_path), str(output_path))
+                new_root = file_path.replace(str(input_path), str(output_path))
+                new_root, extension = os.path.splitext(new_root)
+                new_root, extension2 = os.path.splitext(new_root)
                 os.makedirs(new_root, exist_ok=True)
                 voxelize_from_nifti(file_path, new_root)
 

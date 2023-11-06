@@ -12,23 +12,23 @@ general:
 
 
 voxelize_from_nifti:
-  input: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated'
-  output: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated-ifnet'
+  input: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney'
+  output: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
 
 
 create_voxel_off:
-  root: '/home/tomislav/datasets-ct-extracted/dataset-CACTS-generated-ifnet'
+  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
   unpackbits: True
   min: -0.5
   max: 0.5
 
 
 rename_voxel_off:
-  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
 
 
 boundary_sampling:
-  root: '/data1/practical-sose23/dataset-verse19/crops-unaligned_voxels-128_zoom-1-1-1-ifnet/'
+  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
   #specifies standard deviations of the normally distributed displacements added onto surface samples.
   sigmas: [0.1, 0.01]
   sample_number: 100000

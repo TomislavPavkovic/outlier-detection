@@ -9,15 +9,12 @@ from omegaconf import DictConfig
 @hydra.main(version_base=None, config_path='..', config_name='ifnet_config')
 def main(cfg: DictConfig):
     input_path=Path(cfg.rename_voxel_off.root)
-    for folder in os.listdir(input_path):
-        sub_verse = os.path.join(input_path, folder)
-        if os.path.isdir(sub_verse):
-            for filename in os.listdir(sub_verse):
-                crop = os.path.join(sub_verse, filename)
-                if os.path.isdir(crop):
-                    voxel_off = os.path.join(crop, "voxelization_128.off")
-                    isosurf_scaled = os.path.join(crop, "isosurf_scaled.off")
-                    os.rename(voxel_off, isosurf_scaled)
+    for root, dirs, files in os.walk(input_path):
+        for file in files:
+            if file.endswith('voxelization_128.off'):
+                file_path = os.path.join(root, file)
+                new_file_path = file_path.replace('voxelization_128.off', 'isosurf_scaled.off')
+                os.rename(file_path, new_file_path)
 
 if __name__=="__main__":
     main()
