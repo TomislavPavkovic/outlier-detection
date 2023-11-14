@@ -4,11 +4,11 @@ general:
   pointcloud_samples: 3000
   sample_distribution: [0.5, 0.5]
   sample_sigmas: [0.1, 0.01]
-  data_path: '/data1/practical-sose23/shape-prior/dataset-combination-ifnet/'
-  split_file: '/data1/practical-sose23/shape-prior/saved_experiments/split_cervical_verse19.npz'
+  data_path: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
+  split_file: '/home/tomislav/split.npz'
 
   resolution: 128
-  model: 'ShapeNet128Vox'
+  model: 'ShapeNetPoints'
 
 
 voxelize_from_nifti:
@@ -36,7 +36,7 @@ boundary_sampling:
 
 train:
   epochs: 1500
-  batch_size: 16
+  batch_size: 8
   optimizer: 'Adam'
   dropout_probability: 0
   adam_weight_decay: 1e-5
@@ -47,9 +47,9 @@ generate:
   mode: 'test'
   retrieval_resolution: 256
   #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
-  checkpoint: 1500
+  checkpoint: 465
   #choose the number of points that fit into GPU memory at once (400k for small GPU's)
-  batch_points: 1000000
+  batch_points: 500000
   #choose if training during inference should be enabled
   training_during_inference: False
 

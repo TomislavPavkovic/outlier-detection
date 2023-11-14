@@ -200,15 +200,15 @@ class ShapeNetPoints(nn.Module):
     def __init__(self, hidden_dim=256):
         super(ShapeNetPoints, self).__init__()
         # 128**3 res input
-        self.conv_in = nn.Conv3d(1, 16, 3, padding=1, padding_mode='border')
-        self.conv_0 = nn.Conv3d(16, 32, 3, padding=1, padding_mode='border')
-        self.conv_0_1 = nn.Conv3d(32, 32, 3, padding=1, padding_mode='border')
-        self.conv_1 = nn.Conv3d(32, 64, 3, padding=1, padding_mode='border')
-        self.conv_1_1 = nn.Conv3d(64, 64, 3, padding=1, padding_mode='border')
-        self.conv_2 = nn.Conv3d(64, 128, 3, padding=1, padding_mode='border')
-        self.conv_2_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')
-        self.conv_3 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')
-        self.conv_3_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='border')
+        self.conv_in = nn.Conv3d(1, 16, 3, padding=1, padding_mode='replicate')
+        self.conv_0 = nn.Conv3d(16, 32, 3, padding=1, padding_mode='replicate')
+        self.conv_0_1 = nn.Conv3d(32, 32, 3, padding=1, padding_mode='replicate')
+        self.conv_1 = nn.Conv3d(32, 64, 3, padding=1, padding_mode='replicate')
+        self.conv_1_1 = nn.Conv3d(64, 64, 3, padding=1, padding_mode='replicate')
+        self.conv_2 = nn.Conv3d(64, 128, 3, padding=1, padding_mode='replicate')
+        self.conv_2_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='replicate')
+        self.conv_3 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='replicate')
+        self.conv_3_1 = nn.Conv3d(128, 128, 3, padding=1, padding_mode='replicate')
 
         feature_size = (1 +  16 + 32 + 64 + 128 + 128 ) * 7
         self.fc_0 = nn.Conv1d(feature_size, hidden_dim, 1)
