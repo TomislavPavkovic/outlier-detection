@@ -10,14 +10,15 @@ import functools
 import random
 
 
-class VoxelizedDataset2(Dataset):
+class VoxelizedDataset(Dataset):
 
 
     def __init__(self, mode, res = 32,  voxelized_pointcloud = False, pointcloud_samples = 3000, data_path = 'shapenet/data/', split_file = 'shapenet/split.npz',
-                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], **kwargs):
+                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], transform = None , **kwargs):
 
         self.sample_distribution = np.array(sample_distribution)
         self.sample_sigmas = np.array(sample_sigmas)
+        self.transform = transform
 
         assert np.sum(self.sample_distribution) == 1
         assert np.any(self.sample_distribution < 0) == False
@@ -55,6 +56,9 @@ class VoxelizedDataset2(Dataset):
             occupancies = np.unpackbits(np.load(voxel_path)['compressed_occupancies'])
             input = np.reshape(occupancies, (self.res,)*3)
 
+        if self.transform:
+            input = self.transform(input)
+
         points = []
         coords = []
         occupancies = []
@@ -87,7 +91,7 @@ class VoxelizedDataset2(Dataset):
         base_seed = int.from_bytes(random_data, byteorder="big")
         np.random.seed(base_seed + worker_id)
 
-class VoxelizedDataset(Dataset):
+class VoxelizedDataset2(Dataset):
 
 
     def __init__(self, mode, res = 32,  voxelized_pointcloud = False, pointcloud_samples = 3000, data_path = 'shapenet/data/', split_file = 'shapenet/split.npz',

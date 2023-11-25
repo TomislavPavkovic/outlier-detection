@@ -5,6 +5,7 @@ import models.local_model as model
 import models.data.voxelized_data_shapenet as voxelized_data
 from models import training
 import torch
+from data_processing.data_augmentation import Delete_random_patch
 
 
 @hydra.main(version_base=None, config_path='.', config_name='ifnet_config')
@@ -31,7 +32,8 @@ def main(cfg: DictConfig):
         sample_sigmas=cfg_general.sample_sigmas,
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
-        num_workers=30
+        num_workers=30,
+        transform=Delete_random_patch(cfg_train.deleted_patch_min_size, cfg_train.deleted_patch_max_size)
     )
 
     val_dataset = voxelized_data.VoxelizedDataset(
