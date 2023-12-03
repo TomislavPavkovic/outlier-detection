@@ -10,7 +10,11 @@ def convert_to_nifti(res, input_path, output_path, ground_truth):
         np_data = np.load(input_path)
         np_data = np.unpackbits(np_data)
         np_data = np.reshape(np_data, (res,)*3)
-        ni_ground_truth = nib.load(ground_truth)
+        try:
+            ni_ground_truth = nib.load(ground_truth)
+        except:
+            print("skip: "+input_path)
+            return
         new_nifti = nib.Nifti1Image(np_data, ni_ground_truth.affine, ni_ground_truth.header)
         nib.save(new_nifti, output_path)
 
