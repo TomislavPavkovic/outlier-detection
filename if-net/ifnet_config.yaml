@@ -17,7 +17,7 @@ voxelize_from_nifti:
 
 
 create_voxel_off:
-  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
+  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/0001_visceral_gc/labels/10000005_right kidney_sized'
   unpackbits: True
   min: -0.5
   max: 0.5
@@ -40,8 +40,8 @@ train:
   optimizer: 'Adam'
   dropout_probability: 0
   adam_weight_decay: 1e-5
-  deleted_patch_min_size: 0
-  deleted_patch_max_size: 50
+  deleted_patch_min_size: 0.0
+  deleted_patch_max_size: 30.0
 
 
 generate:
@@ -49,7 +49,7 @@ generate:
   mode: 'test'
   retrieval_resolution: 256
   #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
-  checkpoint: 486
+  checkpoint: 433
   #choose the number of points that fit into GPU memory at once (400k for small GPU's)
   batch_points: 500000
   #choose if training during inference should be enabled

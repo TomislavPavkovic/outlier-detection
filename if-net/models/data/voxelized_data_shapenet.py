@@ -14,11 +14,11 @@ class VoxelizedDataset(Dataset):
 
 
     def __init__(self, mode, res = 32,  voxelized_pointcloud = False, pointcloud_samples = 3000, data_path = 'shapenet/data/', split_file = 'shapenet/split.npz',
-                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], transform = None , **kwargs):
+                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], transforms = None , **kwargs):
 
         self.sample_distribution = np.array(sample_distribution)
         self.sample_sigmas = np.array(sample_sigmas)
-        self.transform = transform
+        self.transforms = transforms
 
         assert np.sum(self.sample_distribution) == 1
         assert np.any(self.sample_distribution < 0) == False
@@ -48,7 +48,7 @@ class VoxelizedDataset(Dataset):
         path = self.path + self.data[idx]
 
         if not self.voxelized_pointcloud:
-            occupancies = np.load(path + '/voxelization_{}.npy'.format(self.res))
+            occupancies = np.load(path + '/voxelization_{}_def_p.npy'.format(self.res))
             occupancies = np.unpackbits(occupancies)
             input = np.reshape(occupancies, (self.res,)*3)
         else:
@@ -56,8 +56,9 @@ class VoxelizedDataset(Dataset):
             occupancies = np.unpackbits(np.load(voxel_path)['compressed_occupancies'])
             input = np.reshape(occupancies, (self.res,)*3)
 
-        if self.transform:
-            input = self.transform(input)
+        if self.transforms:
+            for transform in self.transforms:
+                input = transform(input)
 
         points = []
         coords = []
