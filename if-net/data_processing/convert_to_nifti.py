@@ -2,6 +2,7 @@ import hydra
 import numpy as np
 import nibabel as nib
 import os
+import glob
 
 from omegaconf import DictConfig
 
@@ -18,6 +19,17 @@ def convert_to_nifti(res, input_path, output_path, ground_truth):
         new_nifti = nib.Nifti1Image(np_data, ni_ground_truth.affine, ni_ground_truth.header)
         nib.save(new_nifti, output_path)
 
+def find_gt_file(gt_path):
+    gt_paths = glob.glob(gt_path)
+    if not gt_paths:
+        print("ground truth not found: " + gt_path)
+        return None
+    elif len(gt_paths) > 1:
+        print("multiple groundtruths found: " + gt_paths)
+        return None
+    else:
+        return gt_paths[0]
+
 
 @hydra.main(version_base=None, config_path='..', config_name='ifnet_config')
 def main(cfg: DictConfig):
@@ -28,7 +40,8 @@ def main(cfg: DictConfig):
         out_dir_exists = os.path.exists(sub_verse_output)
         if not out_dir_exists:
             os.makedirs(sub_verse_output)
-        sub_verse_gt = os.path.join(cfg_convert_to_nifti.ground_truth, folder)
+        sub_verse_gt = os.path.join(cfg_convert_to_nifti.ground_truth, '*/')
+        sub_verse_gt = os.path.join(sub_verse_gt, folder)
         if os.path.isdir(sub_verse):
             for filename in os.listdir(sub_verse):
                 crop = os.path.join(sub_verse, filename)
@@ -42,7 +55,9 @@ def main(cfg: DictConfig):
                 if os.path.isdir(crop):
                     voxel_input = os.path.join(crop, "voxelization_128.npy")
                     nifti_output = os.path.join(crop_output, "surface_reconstruction.nii.gz")
-                    convert_to_nifti(cfg.general.resolution, voxel_input, nifti_output, crop_gt)
+                    crop_gt = find_gt_file(crop_gt)
+                    if crop_gt:
+                        convert_to_nifti(cfg.general.resolution, voxel_input, nifti_output, crop_gt)
 
 
 if __name__ == '__main__':
