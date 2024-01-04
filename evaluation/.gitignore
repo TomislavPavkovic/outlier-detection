@@ -1,0 +1,5 @@
+# Hydra outputs
+outputs/
+
+# Evaluation results files
+*.csv
