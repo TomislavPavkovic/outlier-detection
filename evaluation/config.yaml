@@ -4,11 +4,11 @@
 # Both directories must only include the segmentation masks and nothing else.
 source_dir:
   gt: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney'
-  pred: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints_perlin_treshold_085_087/evaluation_171_@256/generation/nifties/labels'
+  pred: '/home/tomislav/outlier-detection/if-net/experiments/'
 
-# Define which regions should be considered
-# Accepted values: all, cervical, thoracic, lumbar
-region: 'all'
+
+# Evaluate all experiments in specified pred directory
+evaluate_all: True
 
 # Define file to save results
 results:

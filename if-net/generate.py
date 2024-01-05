@@ -1,6 +1,8 @@
 import hydra
 import torch
 from omegaconf import DictConfig
+import glob
+import numpy as np
 
 import models.local_model as model
 import models.data.voxelized_data_shapenet as voxelized_data
@@ -44,26 +46,45 @@ def main(cfg: DictConfig):
         cfg_general.resolution,
         cfg_general.model
     )
-
-    trainer = training.Trainer(net, torch.device("cuda"), None, None, exp_name, optimizer='Adam')
-
-    gen = Generator(
-        net,
-        0.5,
-        exp_name,
-        checkpoint=cfg_generate.checkpoint,
-        resolution=cfg_generate.retrieval_resolution,
-        batch_points=cfg_generate.batch_points,
-        trainer=trainer
-    )
-
-    if not cfg_generate.training_during_inference:
-        out_path = 'experiments/{}/evaluation_{}_@{}/'.format(exp_name, cfg_generate.checkpoint, cfg_generate.retrieval_resolution)
-        gen_iterator(out_path, dataset, gen)
+    if cfg_generate.generate_all:
+        exp_name_regex = './experiments/' + exp_name + '*'
+        exp_names = glob.glob(exp_name_regex)
+        exp_names = [name.split('/')[-1] for name in exp_names]
     else:
-        out_path = 'experiments/{}/evaluation_{}_@{}_unoptimized/'.format(exp_name, cfg_generate.checkpoint, cfg_generate.retrieval_resolution)
-        out_path_optimized = 'experiments/{}/evaluation_{}_@{}_optimized/'.format(exp_name, cfg_generate.checkpoint, cfg_generate.retrieval_resolution)
-        gen_iterator_training(out_path, out_path_optimized, dataset, gen)
+        exp_names = [exp_name]
+    
+    for exp_name in exp_names:
+        print('-------------------------------------')
+        print(exp_name)
+        print('-------------------------------------')
+        trainer = training.Trainer(net, torch.device("cuda"), None, None, exp_name, optimizer='Adam')
+        val_mins = glob.glob('./experiments/' + exp_name + '/val_min=*.npy')
+        if cfg_generate.get('checkpoint') is not None:
+            checkpoint_value = cfg_generate.checkpoint
+        else:
+            if len(val_mins) != 1:
+                print('Could not find minimum validation value!')
+                continue
+            else:
+                checkpoint_value = int(np.load(val_mins[0])[0])
+                print('Checkpoint value:', checkpoint_value)
+        gen = Generator(
+            net,
+            0.5,
+            exp_name,
+            checkpoint=checkpoint_value,
+            resolution=cfg_generate.retrieval_resolution,
+            batch_points=cfg_generate.batch_points,
+            trainer=trainer
+        )
+
+        if not cfg_generate.training_during_inference:
+            out_path = 'experiments/{}/evaluation_{}_@{}/'.format(exp_name, checkpoint_value, cfg_generate.retrieval_resolution)
+            gen_iterator(out_path, dataset, gen)
+        else:
+            out_path = 'experiments/{}/evaluation_{}_@{}_unoptimized/'.format(exp_name, checkpoint_value, cfg_generate.retrieval_resolution)
+            out_path_optimized = 'experiments/{}/evaluation_{}_@{}_optimized/'.format(exp_name, checkpoint_value, cfg_generate.retrieval_resolution)
+            gen_iterator_training(out_path, out_path_optimized, dataset, gen)
 
 
 if __name__ == '__main__':

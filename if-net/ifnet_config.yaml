@@ -5,7 +5,7 @@ general:
   sample_distribution: [0.5, 0.5]
   sample_sigmas: [0.1, 0.01]
   data_path: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
-  split_file: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/split.npz'
+  split_file: '/home/tomislav/split.npz'
 
   resolution: 128
   model: 'ShapeNetPoints'
@@ -49,26 +49,31 @@ generate:
   mode: 'test'
   retrieval_resolution: 256
   #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
-  checkpoint: 171
+  #checkpoint: 171
   #choose the number of points that fit into GPU memory at once (400k for small GPU's)
   batch_points: 500000
   #choose if training during inference should be enabled
   training_during_inference: False
+  #generate samples for all available experiments
+  generate_all: True
 
 
 voxelize:
   #root folder of the generate.py output
-  root: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints_perlin_treshold_085_087/evaluation_171_@256/generation/'
+  root: '/home/tomislav/outlier-detection/if-net/experiments/'
   #filename of voxelize.py output (default: surface_reconstruction.off)
   filename: 'surface_reconstruction.off'
-
+  #generate samples for all available experiments
+  generate_all: True
 
 convert_to_nifti:
   #root folder of the generate.py output
-  input: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints_perlin_treshold_085_087/evaluation_171_@256/generation'
+  input: '/home/tomislav/outlier-detection/if-net/experiments'
   #folder where generated nifti files will be saved
-  output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints_perlin_treshold_085_087/evaluation_171_@256/generation/nifties/'
+  output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints_delete_add_0-30/evaluation_200_@256/generation/nifties/'
   #unprocessed dataset folder (nifti format) of the dataset used for generate.py
   ground_truth: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney/'
   #should be True only for automated prediction because of the different naming scheme
   is_prediction: False
+  #generate samples for all available experiments
+  generate_all: True

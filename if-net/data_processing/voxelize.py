@@ -38,6 +38,10 @@ def voxelize(in_path, res, input_filename):
 
 @hydra.main(version_base=None, config_path='..', config_name='ifnet_config')
 def main(cfg: DictConfig):
+    if cfg.voxelize.generate_all:
+        root = cfg.voxelize.root + '/*/evaluation*/generation/labels/*/'
+    else:
+        root = cfg.voxelize.root + '/labels/*/'
     p = Pool(mp.cpu_count())
     p.map(
         partial(
@@ -45,7 +49,7 @@ def main(cfg: DictConfig):
             res=cfg.general.resolution,
             input_filename=cfg.voxelize.filename
         ),
-        glob.glob(cfg.voxelize.root + '/*/*/')
+        glob.glob(root)
     )
 
 

@@ -50,95 +50,105 @@ def main(cfg: DictConfig):
     # Load config
     pred_source_dir = cfg.source_dir.pred
     gt_source_dir = cfg.source_dir.gt
-    region = cfg.region
     results_file = cfg.results.file
     overwrite_results_file_if_exists = cfg.results.overwrite_if_exists
 
-    if region not in ['all', 'cervical', 'thoracic', 'lumbar']:
-        raise Exception('Specified region does not exist. Valid values are "all", "cervical", "thoracic", "lumbar"')
+    if cfg.evaluate_all:
+        pred_source_dir_regex = pred_source_dir + '/*/evaluation*/generation/nifties/labels'
+        pred_source_dirs = glob.glob(pred_source_dir_regex)
+    else:
+        pred_source_dirs = [pred_source_dir]
+    
+    for pred_source_dir in pred_source_dirs:
+        print('-------------------------------------')
+        print(pred_source_dir)
+        print('-------------------------------------')
+        
+        if cfg.evaluate_all:
+            results_file = '/'.join(pred_source_dir.split('/')[:-3]) + '/scores.csv'
 
-    casenames: List[str] = []
-    dices: List[float] = []
-    asds: List[float] = []
-    hd95s: List[float] = []
-    max_distances: List[float] = []
+        casenames: List[str] = []
+        dices: List[float] = []
+        asds: List[float] = []
+        hd95s: List[float] = []
+        max_distances: List[float] = []
 
-    for dirpath, dirnames, filenames in os.walk(pred_source_dir):
-        # Nifti files are only at the leaf directory
-        if len(filenames) == 0:
-            continue
-
-        filename: str
-        for filename in filenames:
-            # Skip if prediction is actually a ground truth (can be the case for recon-siren)
-            if filename.endswith('gt.nii.gz'):
+        for dirpath, dirnames, filenames in os.walk(pred_source_dir):
+            # Nifti files are only at the leaf directory
+            if len(filenames) == 0:
                 continue
 
-            if_net = False
-            if filename == 'surface_reconstruction.nii.gz':
-                if_net = True
-                filename = dirpath.split('/')[-1]
-                dirpath = '/'.join(dirpath.split('/')[:-1])
-            print(filename)
-            # Get subject name
+            filename: str
+            for filename in filenames:
+                # Skip if prediction is actually a ground truth (can be the case for recon-siren)
+                if filename.endswith('gt.nii.gz'):
+                    continue
 
-            # Load prediction
-            nifti_pred: nb.nifti1.Nifti1Image
-            if if_net:
-                nifti_pred = nb.load(dirpath + '/' + filename + '/surface_reconstruction.nii.gz')
-            else:
-                nifti_pred = nb.load(dirpath + '/' + filename)
-            shape_pred = nifti_pred.shape
-            spacing_pred = nb.affines.voxel_sizes(nifti_pred.affine)
+                if_net = False
+                if filename == 'surface_reconstruction.nii.gz':
+                    if_net = True
+                    filename = dirpath.split('/')[-1]
+                    dirpath = '/'.join(dirpath.split('/')[:-1])
+                print(filename)
+                # Get subject name
 
-            # Load ground truth
-            path_gt_regex = gt_source_dir + '/**/' + filename + '.nii.gz'
-            paths_gt = glob.glob(path_gt_regex, recursive=True)
-            if len(paths_gt) != 1:
-                raise Exception('Found not exactly one one matching ground truth path for', path_gt_regex)
-            path_gt = paths_gt[0]
-            nifti_gt: nb.nifti1.Nifti1Image = nb.load(path_gt)
-            shape_gt = nifti_gt.shape
-            spacing_gt = nb.affines.voxel_sizes(nifti_gt.affine)
+                # Load prediction
+                nifti_pred: nb.nifti1.Nifti1Image
+                if if_net:
+                    nifti_pred = nb.load(dirpath + '/' + filename + '/surface_reconstruction.nii.gz')
+                else:
+                    nifti_pred = nb.load(dirpath + '/' + filename)
+                shape_pred = nifti_pred.shape
+                spacing_pred = nb.affines.voxel_sizes(nifti_pred.affine)
 
-            # Make sure shape and spacing is the same for prediction and ground truth
-            assert shape_pred == shape_gt
-            assert np.allclose(spacing_pred, spacing_gt)
+                # Load ground truth
+                path_gt_regex = gt_source_dir + '/**/' + filename + '.nii.gz'
+                paths_gt = glob.glob(path_gt_regex, recursive=True)
+                if len(paths_gt) != 1:
+                    raise Exception('Found not exactly one one matching ground truth path for', path_gt_regex)
+                path_gt = paths_gt[0]
+                nifti_gt: nb.nifti1.Nifti1Image = nb.load(path_gt)
+                shape_gt = nifti_gt.shape
+                spacing_gt = nb.affines.voxel_sizes(nifti_gt.affine)
 
-            # Compute scores
-            print('Computing scores for', path_gt)
-            eval_single(nifti_pred.get_fdata(), nifti_gt.get_fdata(), spacing_pred, dices, asds, hd95s, max_distances)
+                # Make sure shape and spacing is the same for prediction and ground truth
+                assert shape_pred == shape_gt
+                assert np.allclose(spacing_pred, spacing_gt)
 
-    # Compute means and standard deviations
-    dice_mean = np.mean(dices)
-    dice_std = np.std(dices)
-    asd_mean = np.mean(asds)
-    asd_std = np.std(asds)
-    hd95_mean = np.mean(hd95s)
-    hd95_std = np.std(hd95s)
-    max_distance_mean = np.mean(max_distances)
-    max_distance_std = np.std(max_distances)
+                # Compute scores
+                print('Computing scores for', path_gt)
+                eval_single(nifti_pred.get_fdata(), nifti_gt.get_fdata(), spacing_pred, dices, asds, hd95s, max_distances)
 
-    # Print results
-    print('Dice:           Mean:', dice_mean, '  ;  Std:', dice_std)
-    print('ASD:            Mean:', asd_mean, '  ;  Std:', asd_std)
-    print('HD95:           Mean:', hd95_mean, '  ;  Std:', hd95_std)
-    print('Max Distance:   Mean:', max_distance_mean, '  ;  Std:', max_distance_std)
+        # Compute means and standard deviations
+        dice_mean = np.mean(dices)
+        dice_std = np.std(dices)
+        asd_mean = np.mean(asds)
+        asd_std = np.std(asds)
+        hd95_mean = np.mean(hd95s)
+        hd95_std = np.std(hd95s)
+        max_distance_mean = np.mean(max_distances)
+        max_distance_std = np.std(max_distances)
 
-    # Check if we are allowed to write the results to a file
-    if overwrite_results_file_if_exists is False and os.path.isfile(results_file) is True:
-        print('WARNING: Does not write results to file as file already exists!')
-        return
+        # Print results
+        print('Dice:           Mean:', dice_mean, '  ;  Std:', dice_std)
+        print('ASD:            Mean:', asd_mean, '  ;  Std:', asd_std)
+        print('HD95:           Mean:', hd95_mean, '  ;  Std:', hd95_std)
+        print('Max Distance:   Mean:', max_distance_mean, '  ;  Std:', max_distance_std)
 
-    # Save results in csv file
-    with open(results_file, 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(['casename', 'dice', 'asds', 'hd95s', 'max_distances'])
-        for row in zip(casenames, dices, asds, hd95s, max_distances):
-            writer.writerow(row)
-        writer.writerow([])
-        writer.writerow(['MEAN', dice_mean, asd_mean, hd95_mean, max_distance_mean])
-        writer.writerow(['STD', dice_std, asd_std, hd95_std, max_distance_std])
+        # Check if we are allowed to write the results to a file
+        if overwrite_results_file_if_exists is False and os.path.isfile(results_file) is True:
+            print('WARNING: Does not write results to file as file already exists!')
+            return
+
+        # Save results in csv file
+        with open(results_file, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['casename', 'dice', 'asds', 'hd95s', 'max_distances'])
+            for row in zip(casenames, dices, asds, hd95s, max_distances):
+                writer.writerow(row)
+            writer.writerow([])
+            writer.writerow(['MEAN', dice_mean, asd_mean, hd95_mean, max_distance_mean])
+            writer.writerow(['STD', dice_std, asd_std, hd95_std, max_distance_std])
 
 
 if __name__ == '__main__':
