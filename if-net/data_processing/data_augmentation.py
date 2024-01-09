@@ -2,7 +2,7 @@ import numpy as np
 import noise
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from data_processing.perlin import rand_perlin_3d_mask
+from perlin import rand_perlin_3d_mask
 
 class Delete_random_patch():
     def __init__(self, min_patch_size, max_patch_size):
@@ -103,22 +103,46 @@ class Deform_with_perlin_noise():
         return obj
 '''
 class Deform_with_perlin_noise():
-    def __init__(self, percent_range, mode):
+    def __init__(self, percent_range, mode, padding=12, hills=4):
         self.percent_range = percent_range
         self.mode = mode
+        self.padding = padding
+        self.hills = hills
 
     def __call__(self, obj):
+        nonzero_voxels = np.array(np.where(obj > 0))
+        min_coords = np.min(nonzero_voxels, axis=1)
+        max_coords = np.max(nonzero_voxels, axis=1)
+        shape = max_coords - min_coords
+        for i in range(0,3):
+            if shape[i] > 128 - self.padding:
+                shape[i] = 128
+                min_coords[i] = 0
+            else:
+                shape[i] += self.padding
+                min_coords[i] -= self.padding // 2
+                if min_coords[i] < 0:
+                    min_coords[i] = 0
+        shape = shape // self.hills * self.hills #if (shape // 4 * 4 == shape).all() else shape // 4 * 4 + 4
+        if (shape == 0).any():
+            return obj
+        perlin_shape = rand_perlin_3d_mask(shape, self.hills, self.percent_range).numpy()
+        expanded_perlin_shape = np.zeros(obj.shape, dtype=obj.dtype)
+        expanded_perlin_shape[min_coords[0]:min_coords[0] + shape[0],
+                              min_coords[1]:min_coords[1] + shape[1],
+                              min_coords[2]:min_coords[2] + shape[2]] = perlin_shape
         if self.mode == '-':
-            return obj * (1 - rand_perlin_3d_mask(obj.shape, 4, self.percent_range).numpy())
+            return obj * (1 - expanded_perlin_shape)
         else:
-            return obj + rand_perlin_3d_mask(obj.shape, 4, self.percent_range).numpy()
-    
-ct_scan = np.load('/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/0001_visceral_gc/labels/10000011_right kidney_sized/voxelization_128.npy')
+            return obj + expanded_perlin_shape
+
+'''    
+ct_scan = np.load('/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/0037_totalsegmentator/labels/s0958_right kidney_sized/voxelization_128.npy')
 occupancies = np.unpackbits(ct_scan)
 input = np.reshape(occupancies, (128,)*3)
 # Deform the cube using Perlin noise
 #aug = Add_random_patch(29, 30)
-aug = Deform_with_perlin_noise((0.8, 0.85), '+')
+aug = Deform_with_perlin_noise((0.90, 0.91), '+', 10, 3)
 deformed_grid = aug(np.copy(input))
 
 fig = plt.figure()
@@ -131,3 +155,4 @@ ax.set_title("Deformed Object with Perlin Noise")
 ax.voxels(deformed_grid, edgecolor='k')
 
 plt.show()
+'''
