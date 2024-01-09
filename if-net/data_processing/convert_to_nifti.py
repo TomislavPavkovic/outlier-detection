@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
     cfg_convert_to_nifti = cfg.convert_to_nifti
 
     if cfg_convert_to_nifti.generate_all:
-        inputs_regex = cfg_convert_to_nifti.input + '/*/evaluation*/generation'
+        inputs_regex = cfg_convert_to_nifti.input + '/*/evaluation*_def_perlin/generation'
         inputs = glob.glob(inputs_regex)
     else:
         inputs = [cfg_convert_to_nifti.input]
@@ -77,7 +77,7 @@ def main(cfg: DictConfig):
                         voxel_input = os.path.join(crop, "voxelization_128.npy")
                         nifti_output = os.path.join(crop_output, "surface_reconstruction.nii.gz")
                         crop_gt = find_gt_file(crop_gt)
-                        if crop_gt:
+                        if crop_gt and os.path.exists(voxel_input):
                             convert_to_nifti(cfg.general.resolution, voxel_input, nifti_output, crop_gt)
 
 

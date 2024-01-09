@@ -5,7 +5,7 @@ import models.local_model as model
 import models.data.voxelized_data_shapenet as voxelized_data
 from models import training
 import torch
-from data_processing.data_augmentation import Delete_random_patch, Deform_with_perlin_noise, Add_random_patch
+#from data_processing.data_augmentation import Delete_random_patch, Deform_with_perlin_noise, Add_random_patch
 
 @hydra.main(version_base=None, config_path='.', config_name='ifnet_config')
 def main(cfg: DictConfig):
