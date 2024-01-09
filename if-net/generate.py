@@ -36,7 +36,8 @@ def main(cfg: DictConfig):
         sample_sigmas=cfg_general.sample_sigmas,
         num_sample_points=100,
         batch_size=1,
-        num_workers=0
+        num_workers=0,
+        single_image=cfg_generate.single_image
     )
 
     exp_name = 'i{}_dist-{}sigmas-{}v{}_m{}'.format(
@@ -80,6 +81,8 @@ def main(cfg: DictConfig):
 
         if not cfg_generate.training_during_inference:
             out_path = 'experiments/{}/evaluation_{}_@{}/'.format(exp_name, checkpoint_value, cfg_generate.retrieval_resolution)
+            if cfg_generate.single_image:
+                out_path = cfg_generate.out_path
             gen_iterator(out_path, dataset, gen)
         else:
             out_path = 'experiments/{}/evaluation_{}_@{}_unoptimized/'.format(exp_name, checkpoint_value, cfg_generate.retrieval_resolution)
