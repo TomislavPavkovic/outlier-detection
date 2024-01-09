@@ -67,6 +67,9 @@ def main(cfg: DictConfig):
         if cfg.evaluate_all:
             results_file = '/'.join(pred_source_dir.split('/')[:-3]) + '/scores.csv'
 
+        if os.path.exists(results_file):
+            continue
+
         casenames: List[str] = []
         dices: List[float] = []
         asds: List[float] = []
@@ -117,6 +120,7 @@ def main(cfg: DictConfig):
 
                 # Compute scores
                 print('Computing scores for', path_gt)
+                casenames.append(path_gt)
                 eval_single(nifti_pred.get_fdata(), nifti_gt.get_fdata(), spacing_pred, dices, asds, hd95s, max_distances)
 
         # Compute means and standard deviations
@@ -128,6 +132,7 @@ def main(cfg: DictConfig):
         hd95_std = np.std(hd95s)
         max_distance_mean = np.mean(max_distances)
         max_distance_std = np.std(max_distances)
+        dice_sorted_indexes = np.argsort(dices)
 
         # Print results
         print('Dice:           Mean:', dice_mean, '  ;  Std:', dice_std)
@@ -149,6 +154,9 @@ def main(cfg: DictConfig):
             writer.writerow([])
             writer.writerow(['MEAN', dice_mean, asd_mean, hd95_mean, max_distance_mean])
             writer.writerow(['STD', dice_std, asd_std, hd95_std, max_distance_std])
+            writer.writerow([])
+            for index in dice_sorted_indexes[0:int(len(dice_sorted_indexes)*0.1)]:
+                writer.writerow([casenames[index], dices[index]])
 
 
 if __name__ == '__main__':
