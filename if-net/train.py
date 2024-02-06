@@ -31,9 +31,8 @@ def main(cfg: DictConfig):
         sample_sigmas=cfg_general.sample_sigmas,
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
-        num_workers=30
-        #transforms=[Add_random_patch(cfg_train.deleted_patch_min_size, cfg_train.deleted_patch_max_size),
-        #           Delete_random_patch(cfg_train.deleted_patch_min_size, cfg_train.deleted_patch_max_size)]
+        num_workers=30,
+        augmented_extension='_def_p_sized'
     )
 
     val_dataset = voxelized_data.VoxelizedDataset(
@@ -47,7 +46,8 @@ def main(cfg: DictConfig):
         sample_sigmas=cfg_general.sample_sigmas,
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
-        num_workers=30
+        num_workers=30,
+        augmented_extension='_def_fixed'
     )
 
     exp_name = 'i{}_dist-{}sigmas-{}v{}_m{}'.format(
