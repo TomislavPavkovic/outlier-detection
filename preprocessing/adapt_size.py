@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 from scipy.ndimage import zoom
+from nilearn.image import resample_img
 
 def adapt_size(res, file_path, new_file_path):
     ct_scan = nib.load(file_path)
@@ -12,18 +13,21 @@ def adapt_size(res, file_path, new_file_path):
     min_coords = np.min(nonzero_voxels, axis=1)
     max_coords = np.max(nonzero_voxels, axis=1)
 
-    if (min_coords==0).any() or (max_coords==image_data.shape).any():
+    if (min_coords==0).any() or (max_coords+1==image_data.shape).any():
         print('Skipping (cut object)', file_path)
         return
     
     if ((max_coords - min_coords) > 128).any():
         print('zooming', file_path)
-        print(max_coords - min_coords)
-        zoom_multipliers = [128 / (max_coord - min_coord) 
-                            if max_coord - min_coord > 128 else 1 
+        zoom_multipliers = [(max_coord - min_coord) / 124 * 1.5
+                            if max_coord - min_coord > 128 else 1.5 
                             for max_coord, min_coord in zip(max_coords, min_coords)]
-        print(zoom_multipliers)
-        image_data = zoom(image_data, zoom_multipliers)
+        ct_scan = resample_img(ct_scan, target_affine = nib.affines.rescale_affine(ct_scan.affine, ct_scan.shape, (max(zoom_multipliers),)*3), interpolation='nearest')
+        image_data = ct_scan.get_fdata()
+
+        nonzero_voxels = np.array(np.where(image_data > 0))
+        min_coords = np.min(nonzero_voxels, axis=1)
+        max_coords = np.max(nonzero_voxels, axis=1)
 
     center = (max_coords + min_coords) // 2
 
@@ -57,7 +61,7 @@ def adapt_size(res, file_path, new_file_path):
     nib.save(new_nifti_img, new_file_path)
 
 if __name__ == "__main__":
-    root_directory = "/home/tomislav/datasets-ct-extracted/dataset-CACTS/right kidney"
+    root_directory = "/home/tomislav/datasets-ct-extracted-generated/dataset-CACTS-generated/hip_right"
     dataset_name = "datasets-ct-extracted"
     new_dataset_name = "datasets-ct-sized-clean"
     new_root_directory = root_directory.replace(dataset_name, new_dataset_name)
