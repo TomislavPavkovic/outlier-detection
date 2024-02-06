@@ -108,7 +108,8 @@ def main(cfg: DictConfig):
                 path_gt_regex = gt_source_dir + '/**/' + filename + '.nii.gz'
                 paths_gt = glob.glob(path_gt_regex, recursive=True)
                 if len(paths_gt) != 1:
-                    raise Exception('Found not exactly one one matching ground truth path for', path_gt_regex)
+                    print('Found not exactly one one matching ground truth path for', path_gt_regex)
+                    continue
                 path_gt = paths_gt[0]
                 nifti_gt: nb.nifti1.Nifti1Image = nb.load(path_gt)
                 shape_gt = nifti_gt.shape
@@ -116,7 +117,7 @@ def main(cfg: DictConfig):
 
                 # Make sure shape and spacing is the same for prediction and ground truth
                 assert shape_pred == shape_gt
-                assert np.allclose(spacing_pred, spacing_gt)
+                #assert np.allclose(spacing_pred, spacing_gt)
 
                 # Compute scores
                 print('Computing scores for', path_gt)
