@@ -14,23 +14,24 @@ class VoxelizedDataset(Dataset):
 
 
     def __init__(self, mode, res = 32,  voxelized_pointcloud = False, pointcloud_samples = 3000, data_path = 'shapenet/data/', split_file = 'shapenet/split.npz',
-                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], transforms = None, single_image=False, **kwargs):
+                 batch_size = 64, num_sample_points = 1024, num_workers = 12, sample_distribution = [1], sample_sigmas = [0.015], transforms = None, single_image=False, augmented_extension = None, **kwargs):
 
         self.sample_distribution = np.array(sample_distribution)
         self.sample_sigmas = np.array(sample_sigmas)
         self.transforms = transforms
         self.single_image = single_image
+        self.augmented_extension = augmented_extension
 
         assert np.sum(self.sample_distribution) == 1
         assert np.any(self.sample_distribution < 0) == False
         assert len(self.sample_distribution) == len(self.sample_sigmas)
 
         self.path = data_path
-        self.split = np.load(split_file)
 
         if single_image:
             self.data = ['']
         else:
+            self.split = np.load(split_file)
             self.data = self.split[mode]
         self.res = res
 
@@ -52,7 +53,14 @@ class VoxelizedDataset(Dataset):
         path = self.path + self.data[idx]
 
         if not self.voxelized_pointcloud:
-            occupancies = np.load(path + '/voxelization_{}_def_p_sized.npy'.format(self.res))
+            try:
+                if self.augmented_extension is not None:
+                    occupancies = np.load(path + '/voxelization_{}{}.npy'.format(self.res, self.augmented_extension))
+                else:
+                    occupancies = np.load(path + '/voxelization_{}.npy'.format(self.res))
+            except Exception as err:
+                print('File {} not found - skip'.format(path))
+                return {'grid_coords': np.array([]),'occupancies': np.array([]),'points': np.array([]), 'inputs': np.array([]), 'path' : ''}
             occupancies = np.unpackbits(occupancies)
             input = np.reshape(occupancies, (self.res,)*3)
         else:
