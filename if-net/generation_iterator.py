@@ -11,10 +11,12 @@ from multiprocessing import Pool
 
 
 # def gen_iterator(out_path, dataset, gen_p , buff_p, start,end):
-def gen_iterator(out_path, dataset, gen_p):
+def gen_iterator(out_path, dataset, gen_p, analysis=False):
 
     global gen
     gen = gen_p
+    global analysis_flag
+    analysis_flag = analysis
 
     if not os.path.exists(out_path):
         os.makedirs(out_path)
@@ -27,6 +29,8 @@ def gen_iterator(out_path, dataset, gen_p):
     data_tupels = []
     for i, data in tqdm(enumerate(loader)):
 
+        if data['path'][0] == '':
+            continue
 
         path = os.path.normpath(data['path'][0])
         export_path = out_path + '/generation/{}/{}/'.format(path.split(os.sep)[-2], path.split(os.sep)[-1])
@@ -65,7 +69,8 @@ def save_mesh(data_tupel):
     mesh = gen.mesh_from_logits(logits)
 
     path = os.path.normpath(data['path'][0])
-    export_path = out_path + '/generation/{}/{}/'.format(path.split(os.sep)[-2], path.split(os.sep)[-1])
+    export_path = out_path + ('/generation/{}/{}/'.format(path.split(os.sep)[-2], path.split(os.sep)[-1])
+                              if not analysis_flag else '')
 
     if not os.path.exists(export_path):
         os.makedirs(export_path)
