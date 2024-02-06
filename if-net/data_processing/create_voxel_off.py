@@ -8,11 +8,20 @@ import numpy as np
 import multiprocessing as mp
 from multiprocessing import Pool
 import glob
+import os
 
 
 def create_voxel_off(path, unpackbits, resolution, min, max):
     voxel_path = path + '/voxelization_{}.npy'.format(resolution)
     off_path = path + '/voxelization_{}.off'.format(resolution)
+
+    if not os.path.exists(voxel_path):
+        print('File does not exist: ', voxel_path)
+        return
+
+    if os.path.exists(off_path):
+        print('Skipping: ', off_path)
+        return
 
     if unpackbits:
         occ = np.unpackbits(np.load(voxel_path))
