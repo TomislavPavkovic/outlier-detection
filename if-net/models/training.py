@@ -103,7 +103,7 @@ class Trainer(object):
             torch.save({'epoch':epoch,'model_state_dict': self.model.state_dict(),
                         'optimizer_state_dict': self.optimizer.state_dict()}, path)
 
-    def load_checkpoint(self):
+    def load_checkpoint(self, epoch = None):
         checkpoints = glob(self.checkpoint_path+'/*')
         if len(checkpoints) == 0:
             print('No checkpoints found at {}'.format(self.checkpoint_path))
@@ -113,6 +113,9 @@ class Trainer(object):
         checkpoints = np.array(checkpoints, dtype=int)
         checkpoints = np.sort(checkpoints)
         path = self.checkpoint_path + 'checkpoint_epoch_{}.tar'.format(checkpoints[-1])
+
+        if epoch is not None and epoch in checkpoints:
+            path = self.checkpoint_path + 'checkpoint_epoch_{}.tar'.format(epoch)
 
         print('Loaded checkpoint from: {}'.format(path))
         checkpoint = torch.load(path)
@@ -136,3 +139,25 @@ class Trainer(object):
             sum_val_loss += self.compute_loss( val_batch).item()
 
         return sum_val_loss / num_batches
+    
+    def evaluate_all_checkpoints (self, epochs):
+        start = self.load_checkpoint(epoch=0)
+
+        for epoch in range(start, epochs):
+            print('Evaluate epoch {}'.format(epoch))
+
+            if epoch % 1 == 0:
+                self.load_checkpoint(epoch=epoch)
+                val_loss = self.compute_val_loss()
+
+                if self.val_min is None:
+                    self.val_min = val_loss
+
+                if val_loss < self.val_min:
+                    self.val_min = val_loss
+                    for path in glob(self.exp_path + 'val_min=*'):
+                        os.remove(path)
+                    np.save(self.exp_path + 'val_min={}'.format(epoch),[epoch,val_loss])
+
+
+                self.writer.add_scalar('val loss batch avg', val_loss, epoch)
