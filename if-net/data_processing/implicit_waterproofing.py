@@ -1,5 +1,7 @@
 import trimesh
 import numpy as np
+import sys
+sys.path.append('/home/tomislav/outlier-detection/if-net/')
 from data_processing.libmesh.inside_mesh import check_mesh_contains
 import math
 import os

@@ -54,7 +54,7 @@ def main(cfg: DictConfig):
     overwrite_results_file_if_exists = cfg.results.overwrite_if_exists
 
     if cfg.evaluate_all:
-        pred_source_dir_regex = pred_source_dir + '/*/evaluation*/generation/nifties/labels'
+        pred_source_dir_regex = pred_source_dir + '/*Points/evaluation*generated/generation/nifties/labels'
         pred_source_dirs = glob.glob(pred_source_dir_regex)
     else:
         pred_source_dirs = [pred_source_dir]
@@ -65,10 +65,13 @@ def main(cfg: DictConfig):
         print('-------------------------------------')
         
         if cfg.evaluate_all:
-            results_file = '/'.join(pred_source_dir.split('/')[:-3]) + '/scores.csv'
+            results_file = '/'.join(pred_source_dir.split('/')[:-3]) + '/scores_gen.csv'
+            outlier_treshold = '/'.join(pred_source_dir.split('/')[:-4]) + '/outlier_threshold.npy'
 
-        if os.path.exists(results_file):
-            continue
+        # Check if we are allowed to write the results to a file
+        if overwrite_results_file_if_exists is False and os.path.isfile(results_file) is True:
+            print('WARNING: Does not write results to file as file already exists!')
+            return
 
         casenames: List[str] = []
         dices: List[float] = []
@@ -134,17 +137,15 @@ def main(cfg: DictConfig):
         max_distance_mean = np.mean(max_distances)
         max_distance_std = np.std(max_distances)
         dice_sorted_indexes = np.argsort(dices)
+        asd_sorted_indexes = np.argsort(asds)[::-1]
+        hd95_sorted_indexes = np.argsort(hd95s)[::-1]
+        max_dist_sorted_indexes = np.argsort(max_distances)[::-1]
 
         # Print results
         print('Dice:           Mean:', dice_mean, '  ;  Std:', dice_std)
         print('ASD:            Mean:', asd_mean, '  ;  Std:', asd_std)
         print('HD95:           Mean:', hd95_mean, '  ;  Std:', hd95_std)
         print('Max Distance:   Mean:', max_distance_mean, '  ;  Std:', max_distance_std)
-
-        # Check if we are allowed to write the results to a file
-        if overwrite_results_file_if_exists is False and os.path.isfile(results_file) is True:
-            print('WARNING: Does not write results to file as file already exists!')
-            return
 
         # Save results in csv file
         with open(results_file, 'w') as f:
@@ -157,8 +158,12 @@ def main(cfg: DictConfig):
             writer.writerow(['STD', dice_std, asd_std, hd95_std, max_distance_std])
             writer.writerow([])
             for index in dice_sorted_indexes[0:int(len(dice_sorted_indexes)*0.1)]:
-                writer.writerow([casenames[index], dices[index]])
-
+                writer.writerow([casenames[index], dices[index], asds[index], hd95s[index], max_distances[index]])
+        if cfg.results.calculate_threshold:
+            np.save(outlier_treshold, [dices[dice_sorted_indexes[int(len(dice_sorted_indexes)*0.05)]], 
+                                       asds[asd_sorted_indexes[int(len(asd_sorted_indexes)*0.05)]],
+                                       hd95s[hd95_sorted_indexes[int(len(hd95_sorted_indexes)*0.05)]],
+                                       max_distances[max_dist_sorted_indexes[int(len(max_dist_sorted_indexes)*0.05)]]])
 
 if __name__ == '__main__':
     main()

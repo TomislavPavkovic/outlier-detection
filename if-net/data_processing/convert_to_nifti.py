@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
     cfg_convert_to_nifti = cfg.convert_to_nifti
 
     if cfg_convert_to_nifti.generate_all:
-        inputs_regex = cfg_convert_to_nifti.input + '/*/evaluation*_def_perlin/generation'
+        inputs_regex = cfg_convert_to_nifti.input + '/*/evaluation*/generation'
         inputs = glob.glob(inputs_regex)
     else:
         inputs = [cfg_convert_to_nifti.input]
