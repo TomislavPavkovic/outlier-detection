@@ -69,39 +69,7 @@ class Add_random_patch():
         modified_data = image_data + mask
 
         return modified_data
-'''
-class Deform_with_perlin_noise():
-    def __init__(self, min_scale=10.0, max_scale=30.0, octaves=6, persistence=0.5, lacunarity=2.0, seed=None, freq=16):
-        self.min_scale = min_scale
-        self.max_scale = max_scale
-        self.octaves = octaves
-        self.persistence = persistence
-        self.lacunarity = lacunarity
-        self.seed = seed
-        self.freq = freq
 
-    def __call__(self, obj):
-        scale = np.random.uniform(self.min_scale, self.max_scale)
-        print(scale)
-        shape = obj.shape
-        
-        for x in range(shape[0]):
-            for y in range(shape[1]):
-                for z in range(shape[2]):
-                    oldv = obj[x][y][z]
-                    obj[x][y][z] += noise.pnoise3(x/scale,
-                                                y/scale,
-                                                z/scale,
-                                                octaves=self.octaves,
-                                                persistence=self.persistence,
-                                                lacunarity=self.lacunarity,
-                                                repeatx=self.freq,
-                                                repeaty=self.freq,
-                                                repeatz=self.freq,
-                                                base=self.seed)
-                    
-        return obj
-'''
 class Deform_with_perlin_noise():
     def __init__(self, percent_range, mode, padding=12, hills=4):
         self.percent_range = percent_range
@@ -123,7 +91,7 @@ class Deform_with_perlin_noise():
                 min_coords[i] -= self.padding // 2
                 if min_coords[i] < 0:
                     min_coords[i] = 0
-        shape = shape // self.hills * self.hills #if (shape // 4 * 4 == shape).all() else shape // 4 * 4 + 4
+        shape = shape // self.hills * self.hills
         if (shape == 0).any():
             return obj
         perlin_shape = rand_perlin_3d_mask(shape, self.hills, self.percent_range).numpy()
@@ -136,23 +104,3 @@ class Deform_with_perlin_noise():
         else:
             return obj + expanded_perlin_shape
 
-'''    
-ct_scan = np.load('/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/0037_totalsegmentator/labels/s0958_right kidney_sized/voxelization_128.npy')
-occupancies = np.unpackbits(ct_scan)
-input = np.reshape(occupancies, (128,)*3)
-# Deform the cube using Perlin noise
-#aug = Add_random_patch(29, 30)
-aug = Deform_with_perlin_noise((0.90, 0.91), '+', 10, 3)
-deformed_grid = aug(np.copy(input))
-
-fig = plt.figure()
-ax = fig.add_subplot(121, projection='3d')
-ax.set_title("Original Object")
-ax.voxels(input, edgecolor='k')
-
-ax = fig.add_subplot(122, projection='3d')
-ax.set_title("Deformed Object with Perlin Noise")
-ax.voxels(deformed_grid, edgecolor='k')
-
-plt.show()
-'''

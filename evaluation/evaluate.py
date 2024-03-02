@@ -54,7 +54,7 @@ def main(cfg: DictConfig):
     overwrite_results_file_if_exists = cfg.results.overwrite_if_exists
 
     if cfg.evaluate_all:
-        pred_source_dir_regex = pred_source_dir + '/*Points/evaluation*generated/generation/nifties/labels'
+        pred_source_dir_regex = pred_source_dir + '/*/evaluation*/generation/nifties/labels'
         pred_source_dirs = glob.glob(pred_source_dir_regex)
     else:
         pred_source_dirs = [pred_source_dir]
@@ -66,8 +66,7 @@ def main(cfg: DictConfig):
         
         if cfg.evaluate_all:
             results_file = '/'.join(pred_source_dir.split('/')[:-3]) + '/scores_gen.csv'
-            outlier_treshold = '/'.join(pred_source_dir.split('/')[:-4]) + '/outlier_threshold.npy'
-
+        
         # Check if we are allowed to write the results to a file
         if overwrite_results_file_if_exists is False and os.path.isfile(results_file) is True:
             print('WARNING: Does not write results to file as file already exists!')
@@ -160,6 +159,7 @@ def main(cfg: DictConfig):
             for index in dice_sorted_indexes[0:int(len(dice_sorted_indexes)*0.1)]:
                 writer.writerow([casenames[index], dices[index], asds[index], hd95s[index], max_distances[index]])
         if cfg.results.calculate_threshold:
+            outlier_treshold = '/'.join(pred_source_dir.split('/')[:-4]) + '/outlier_threshold.npy'
             np.save(outlier_treshold, [dices[dice_sorted_indexes[int(len(dice_sorted_indexes)*0.05)]], 
                                        asds[asd_sorted_indexes[int(len(asd_sorted_indexes)*0.05)]],
                                        hd95s[hd95_sorted_indexes[int(len(hd95_sorted_indexes)*0.05)]],

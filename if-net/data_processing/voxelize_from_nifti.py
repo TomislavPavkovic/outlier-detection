@@ -22,6 +22,7 @@ def voxelize_from_nifti(input_path, output_path):
 
                 occupancies = np.packbits(occupancies)
                 print(occupancies.shape)
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
                 np.save(filename, occupancies)
 
         except Exception as err:
@@ -34,11 +35,12 @@ def voxelize_from_nifti(input_path, output_path):
 def main(cfg: DictConfig):
     input_path = Path(cfg.voxelize_from_nifti.input)
     output_path = Path(cfg.voxelize_from_nifti.output)
+    file_ending = cfg.voxelize_from_nifti.file_ending
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     for root, dirs, files in os.walk(input_path):
         for file in files:
-            if file.endswith(".nii.gz"):
+            if file.endswith(file_ending):
                 file_path = os.path.join(root, file)
                 new_root = file_path.replace(str(input_path), str(output_path))
                 new_root, extension = os.path.splitext(new_root)

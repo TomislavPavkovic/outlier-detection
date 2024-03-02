@@ -32,7 +32,7 @@ def main(cfg: DictConfig):
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
         num_workers=30,
-        augmented_extension='_def_p_sized'
+        augmented_extension='_def_p_sized' if cfg_train.augmented else None
         #transforms=[Add_random_patch(cfg_train.deleted_patch_min_size, cfg_train.deleted_patch_max_size),
         #           Delete_random_patch(cfg_train.deleted_patch_min_size, cfg_train.deleted_patch_max_size)]
     )
@@ -49,7 +49,7 @@ def main(cfg: DictConfig):
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
         num_workers=30,
-        augmented_extension='_def_fixed'
+        augmented_extension='_def_fixed' if cfg_train.augmented else None
     )
 
     exp_name = 'i{}_dist-{}sigmas-{}v{}_m{}'.format(

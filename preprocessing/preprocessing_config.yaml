@@ -1,0 +1,24 @@
+adapt_size:
+  root_directory: "/home/tomislav/datasets-ct-test/dataset-CACTS/liver"
+  dataset_name: "datasets-ct-test"
+  new_dataset_name: "datasets-ct-test-sized"
+  resolution: 128
+
+count_files:
+  root: "/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet"
+  file_ending: ".off"
+
+extract_label:
+  root_directory: "/home/tomislav/datasets-ct/dataset-CACTS/"
+  dataset_name: "datasets-ct"
+  new_dataset_name: "datasets-ct-test"
+  labels: [5]
+  organ_name: 'liver'
+  generated: False
+  multi_organ: False
+  file_ending: ".nii.gz"
+  dataset_subsection: 'totalsegmentator'
+
+remove_files:
+  root_directory: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver/'
+  file_ending: '.nii.gz'

@@ -3,14 +3,15 @@
 # The prediction directory should be structured according to in BIDS or the IF-Net-Output structure.
 # Both directories must only include the segmentation masks and nothing else.
 source_dir:
-  gt: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney'
-  pred: '/home/tomislav/outlier-detection/if-net/experiments/'
+  gt: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
+  pred: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation/nifties/labels'
 
 
 # Evaluate all experiments in specified pred directory
-evaluate_all: True
+evaluate_all: False
 
 # Define file to save results
 results:
-  file: 'scores.csv'
+  file: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/scores.csv'
   overwrite_if_exists: True
+  calculate_threshold: True

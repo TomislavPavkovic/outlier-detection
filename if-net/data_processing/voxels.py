@@ -1,5 +1,5 @@
 import sys
-sys.path.append('~/gitfiles/shape-prior/if-net')
+sys.path.append('/home/tomislav/outlier-detection/if-net/data_processing/')
 import torch
 import numpy as np
 import trimesh

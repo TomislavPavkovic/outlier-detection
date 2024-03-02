@@ -1,4 +1,6 @@
 from functools import partial
+import sys
+sys.path.append('/home/tomislav/outlier-detection/if-net/data_processing/')
 
 import hydra
 from omegaconf import DictConfig

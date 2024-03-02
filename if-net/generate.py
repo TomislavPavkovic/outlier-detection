@@ -37,7 +37,8 @@ def main(cfg: DictConfig):
         num_sample_points=100,
         batch_size=1,
         num_workers=0,
-        single_image=cfg_generate.single_image
+        single_image=cfg_generate.single_image,
+        augmented_extension=None
     )
 
     exp_name = 'i{}_dist-{}sigmas-{}v{}_m{}'.format(

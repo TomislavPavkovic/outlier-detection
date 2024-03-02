@@ -4,6 +4,8 @@ import pandas as pd
 import os
 from scipy.ndimage import zoom
 from nilearn.image import resample_img
+import hydra
+from omegaconf import DictConfig
 
 def adapt_size(res, file_path, new_file_path):
     ct_scan = nib.load(file_path)
@@ -15,7 +17,7 @@ def adapt_size(res, file_path, new_file_path):
 
     if (min_coords==0).any() or (max_coords+1==image_data.shape).any():
         print('Skipping (cut object)', file_path)
-        return
+        return 1
     
     if ((max_coords - min_coords) > 128).any():
         print('zooming', file_path)
@@ -60,10 +62,12 @@ def adapt_size(res, file_path, new_file_path):
     os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
     nib.save(new_nifti_img, new_file_path)
 
-if __name__ == "__main__":
-    root_directory = "/home/tomislav/datasets-ct-extracted-generated/dataset-CACTS-generated/hip_right"
-    dataset_name = "datasets-ct-extracted"
-    new_dataset_name = "datasets-ct-sized-clean"
+@hydra.main(version_base=None, config_path='.', config_name='preprocessing_config')
+def main(cfg: DictConfig):
+    root_directory = cfg.adapt_size.root_directory
+    dataset_name =  cfg.adapt_size.dataset_name
+    new_dataset_name =  cfg.adapt_size.new_dataset_name
+    res =  cfg.adapt_size.resolution
     new_root_directory = root_directory.replace(dataset_name, new_dataset_name)
     if not os.path.exists(new_root_directory):
         os.makedirs(new_root_directory)
@@ -78,3 +82,5 @@ if __name__ == "__main__":
             new_file_path = os.path.join(new_root, new_filename)
             adapt_size(res, file_path, new_file_path)
                 
+if __name__ == "__main__":
+    main()

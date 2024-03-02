@@ -4,44 +4,54 @@ general:
   pointcloud_samples: 3000
   sample_distribution: [0.5, 0.5]
   sample_sigmas: [0.1, 0.01]
-  data_path: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
-  split_file: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/split.npz'
+  data_path: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  split_file: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
 
   resolution: 128
   model: 'ShapeNetPoints'
 
 
 voxelize_from_nifti:
-  input: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney'
-  output: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
+  input: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
+  output: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  file_ending: '.nii.gz'
 
 
 create_voxel_off:
-  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet/0001_visceral_gc/labels/10000005_right kidney_sized'
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
   unpackbits: True
   min: -0.5
   max: 0.5
 
 
 rename_voxel_off:
-  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
 
 
 boundary_sampling:
-  root: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney-ifnet'
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
   #specifies standard deviations of the normally distributed displacements added onto surface samples.
   sigmas: [0.1, 0.01]
   sample_number: 100000
 
+create_splits:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  target: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
+  splits_ratio: [0.8, 0.1, 0.1]
+
+deform_input:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  threshold_min: 0.65
+  threshold_max: 1
 
 train:
   epochs: 1500
-  batch_size: 8
+  batch_size: 10
   optimizer: 'Adam'
   dropout_probability: 0
   adam_weight_decay: 1e-5
-  deleted_patch_min_size: 0.0
-  deleted_patch_max_size: 30.0
+  learning_rate: 1e-4
+  augmented: True
 
 
 generate:
@@ -49,7 +59,7 @@ generate:
   mode: 'test'
   retrieval_resolution: 256
   #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
-  checkpoint: 157
+  checkpoint: 57
   #choose the number of points that fit into GPU memory at once (400k for small GPU's)
   batch_points: 500000
   #choose if training during inference should be enabled
@@ -63,20 +73,33 @@ generate:
 
 voxelize:
   #root folder of the generate.py output
-  root: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_157_@256_def_p_sized/generation'
+  root: '/home/tomislav/outlier-detection/if-net/experiments/'
   #filename of voxelize.py output (default: surface_reconstruction.off)
   filename: 'surface_reconstruction.off'
   #generate samples for all available experiments
-  generate_all: False
+  generate_all: True
+
 
 convert_to_nifti:
   #root folder of the generate.py output
-  input: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_157_@256_def_p_sized/generation'
+  input: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation'
   #folder where generated nifti files will be saved
-  output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_157_@256_def_p_sized/generation/nifties/'
+  output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation/nifties/'
   #unprocessed dataset folder (nifti format) of the dataset used for generate.py
-  ground_truth: '/home/tomislav/datasets-ct-sized/dataset-CACTS/right kidney/'
+  ground_truth: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
   #should be True only for automated prediction because of the different naming scheme
   is_prediction: False
   #generate samples for all available experiments
   generate_all: False
+
+
+analyse:
+  input: '/home/tomislav/datasets-ct/dataset-CACTS-generated/'
+  #split_file: ''
+  single_input: True
+  models_path: '/home/tomislav/outlier-detection/experiments'
+  #checkpoint: 187
+  output_path: '/home/tomislav/outliers.csv'
+  log_path: '/home/tomislav/outliers_log.csv'
+  #choose one or more metrics for outlier detection: 'dice score', 'average surface distance', '95% hausdorff distance', 'maximal surface distance'
+  metrics: ['dice score']

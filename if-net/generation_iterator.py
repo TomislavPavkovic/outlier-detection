@@ -70,7 +70,7 @@ def save_mesh(data_tupel):
 
     path = os.path.normpath(data['path'][0])
     export_path = out_path + ('/generation/{}/{}/'.format(path.split(os.sep)[-2], path.split(os.sep)[-1])
-                              if not analysis_flag else '')
+                              if not analysis_flag else '/')
 
     if not os.path.exists(export_path):
         os.makedirs(export_path)

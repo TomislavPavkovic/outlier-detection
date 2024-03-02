@@ -34,6 +34,7 @@ def find_gt_file(gt_path):
 @hydra.main(version_base=None, config_path='..', config_name='ifnet_config')
 def main(cfg: DictConfig):
     cfg_convert_to_nifti = cfg.convert_to_nifti
+    res = cfg.general.resolution
 
     if cfg_convert_to_nifti.generate_all:
         inputs_regex = cfg_convert_to_nifti.input + '/*/evaluation*/generation'
@@ -74,7 +75,7 @@ def main(cfg: DictConfig):
                         filename = filename.replace("aligned-false", "prediction-lowres_aligned-true")
                     crop_gt = os.path.join(sub_verse_gt, "%s.nii.gz" % filename)
                     if os.path.isdir(crop):
-                        voxel_input = os.path.join(crop, "voxelization_128.npy")
+                        voxel_input = os.path.join(crop, "voxelization_{}.npy".format(res))
                         nifti_output = os.path.join(crop_output, "surface_reconstruction.nii.gz")
                         crop_gt = find_gt_file(crop_gt)
                         if crop_gt and os.path.exists(voxel_input):

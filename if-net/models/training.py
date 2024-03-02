@@ -12,11 +12,11 @@ import numpy as np
 
 class Trainer(object):
 
-    def __init__(self, model, device, train_dataset, val_dataset, exp_name, optimizer='Adam', adam_weight_decay=1e-5):
+    def __init__(self, model, device, train_dataset, val_dataset, exp_name, optimizer='Adam', adam_weight_decay=1e-5, lr=1e-4):
         self.model = model.to(device)
         self.device = device
         if optimizer == 'Adam':
-            self.optimizer = optim.Adam(self.model.parameters(), lr=1e-4, weight_decay=adam_weight_decay)
+            self.optimizer = optim.Adam(self.model.parameters(), lr=lr, weight_decay=adam_weight_decay)
         if optimizer == 'Adadelta':
             self.optimizer = optim.Adadelta(self.model.parameters())
         if optimizer == 'RMSprop':

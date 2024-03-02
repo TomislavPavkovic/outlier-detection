@@ -20,7 +20,7 @@ def voxelize(in_path, res, input_filename):
 
         if os.path.exists(filename):
             return
-        mesh = trimesh.load(Path(in_path + input_filename), process=False)
+        mesh = trimesh.load(Path(os.path.join(in_path, input_filename)), process=False)
         occupancies = voxels.VoxelGrid.from_mesh(mesh, res, loc=[0, 0, 0], scale=1).data
         occupancies = np.reshape(occupancies, -1)
 
@@ -39,7 +39,7 @@ def voxelize(in_path, res, input_filename):
 @hydra.main(version_base=None, config_path='..', config_name='ifnet_config')
 def main(cfg: DictConfig):
     if cfg.voxelize.generate_all:
-        root = cfg.voxelize.root + '/*/evaluation*_def_perlin/generation/labels/*/'
+        root = cfg.voxelize.root + '/*/evaluation*/generation/labels/*/'
     else:
         root = cfg.voxelize.root + '/labels/*/'
     p = Pool(mp.cpu_count())

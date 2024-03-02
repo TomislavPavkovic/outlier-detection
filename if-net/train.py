@@ -32,7 +32,7 @@ def main(cfg: DictConfig):
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
         num_workers=30,
-        augmented_extension='_def_p_sized'
+        augmented_extension='_def_p_sized' if cfg_train.augmented else None
     )
 
     val_dataset = voxelized_data.VoxelizedDataset(
@@ -47,7 +47,7 @@ def main(cfg: DictConfig):
         num_sample_points=50000,
         batch_size=cfg_train.batch_size,
         num_workers=30,
-        augmented_extension='_def_fixed'
+        augmented_extension='_def_fixed' if cfg_train.augmented else None
     )
 
     exp_name = 'i{}_dist-{}sigmas-{}v{}_m{}'.format(
@@ -65,7 +65,8 @@ def main(cfg: DictConfig):
         val_dataset,
         exp_name,
         optimizer=cfg_train.optimizer,
-        adam_weight_decay=cfg_train.adam_weight_decay
+        adam_weight_decay=cfg_train.adam_weight_decay,
+        lr=cfg_train.learning_rate
     )
 
     trainer.train_model(cfg_train.epochs)
