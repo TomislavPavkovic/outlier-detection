@@ -12,6 +12,9 @@ evaluate_all: False
 
 # Define file to save results
 results:
+  #if evaluate_all: True, specified path will be ignored and scores.csv file will be saved in each generation folder
   file: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/scores.csv'
   overwrite_if_exists: True
+  #estimated part of outliers based on which threshold values will be calculated
+  outlier_percentage: 0.05
   calculate_threshold: True

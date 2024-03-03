@@ -1,7 +1,4 @@
 import numpy as np
-import noise
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from perlin import rand_perlin_3d_mask
 
 class Delete_random_patch():

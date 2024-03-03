@@ -34,15 +34,19 @@ boundary_sampling:
   sigmas: [0.1, 0.01]
   sample_number: 100000
 
-create_splits:
-  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
-  target: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
-  splits_ratio: [0.8, 0.1, 0.1]
-
 deform_input:
   root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  #threshold value for perlin noise thresholding is randomly selected from the range between the following values. 
+  #Validation augmentation threshold is calculated as a mean of the following values.
   threshold_min: 0.65
   threshold_max: 1
+
+create_splits:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  #tartget = output path
+  target: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
+  #train:validation:test ratio
+  splits_ratio: [0.8, 0.1, 0.1]
 
 train:
   epochs: 1500
@@ -68,7 +72,8 @@ generate:
   generate_all: False
   #generate a single reconstruction
   single_image: False
-  #out_path: '/home/tomislav'
+  #needed if single_image = True, specify only the folder where the reconstruction should be saved and not the actual file name
+  out_path: '/home/tomislav'
 
 
 voxelize:
@@ -94,12 +99,17 @@ convert_to_nifti:
 
 
 analyse:
-  input: '/home/tomislav/datasets-ct/dataset-CACTS-generated/'
-  #split_file: ''
-  single_input: True
+  #if input is folder, it uses all nifti images in the folder and all subfolders recursively as inputs
+  input: '/home/tomislav/datasets-ct/dataset-CACTS-generated'
+  #folder containing trained models folder with a folder structure as described in readme file
   models_path: '/home/tomislav/outlier-detection/experiments'
+  #checkpoint should be specified only if same checkpoint from all the models should be used
+  #if it's None or commented, optimal checkpoint value stored in model's folder will be used
   #checkpoint: 187
   output_path: '/home/tomislav/outliers.csv'
+  #log file contains files and error messages for the failed analysis runs
   log_path: '/home/tomislav/outliers_log.csv'
   #choose one or more metrics for outlier detection: 'dice score', 'average surface distance', '95% hausdorff distance', 'maximal surface distance'
   metrics: ['dice score']
+  #choose if you want to delete the reconstructions used for outlier detection
+  delete_reconstructions: True

@@ -52,6 +52,7 @@ def main(cfg: DictConfig):
     gt_source_dir = cfg.source_dir.gt
     results_file = cfg.results.file
     overwrite_results_file_if_exists = cfg.results.overwrite_if_exists
+    outlier_percentage = cfg.results.outlier_percentage
 
     if cfg.evaluate_all:
         pred_source_dir_regex = pred_source_dir + '/*/evaluation*/generation/nifties/labels'
@@ -160,10 +161,10 @@ def main(cfg: DictConfig):
                 writer.writerow([casenames[index], dices[index], asds[index], hd95s[index], max_distances[index]])
         if cfg.results.calculate_threshold:
             outlier_treshold = '/'.join(pred_source_dir.split('/')[:-4]) + '/outlier_threshold.npy'
-            np.save(outlier_treshold, [dices[dice_sorted_indexes[int(len(dice_sorted_indexes)*0.05)]], 
-                                       asds[asd_sorted_indexes[int(len(asd_sorted_indexes)*0.05)]],
-                                       hd95s[hd95_sorted_indexes[int(len(hd95_sorted_indexes)*0.05)]],
-                                       max_distances[max_dist_sorted_indexes[int(len(max_dist_sorted_indexes)*0.05)]]])
+            np.save(outlier_treshold, [dices[dice_sorted_indexes[int(len(dice_sorted_indexes)*outlier_percentage)]], 
+                                       asds[asd_sorted_indexes[int(len(asd_sorted_indexes)*outlier_percentage)]],
+                                       hd95s[hd95_sorted_indexes[int(len(hd95_sorted_indexes)*outlier_percentage)]],
+                                       max_distances[max_dist_sorted_indexes[int(len(max_dist_sorted_indexes)*outlier_percentage)]]])
 
 if __name__ == '__main__':
     main()

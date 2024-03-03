@@ -1,8 +1,8 @@
 # Evaluation
-This part of the project includes a script to compute the dice coefficient, average surface distance, 
+This package includes a script to compute the dice coefficient, average surface distance, 
 hausdorff distance, and 95% hausdorff distance between two NIFTI files.
 <br>
-For example, the from a neural network reconstructed NIFTI can be compared to the corresponding ground truth.
+It can be used to evaluate the model by comparing model's reconstructions and ground truth images, and to determine the outlier threshold.
 
 ## Installation
 Create a new conda environment by **navigating to this directory** and executing the following command:

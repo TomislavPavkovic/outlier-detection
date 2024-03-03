@@ -4,6 +4,9 @@ import pandas as pd
 import os
 import hydra
 from omegaconf import DictConfig
+import sys
+sys.path.append('/home/tomislav/outlier-detection/preprocessing')
+from map_to_binary import class_map
 
 def extract_label(label, file_path, new_file_path):
     ct_scan = nib.load(file_path)
@@ -34,16 +37,30 @@ def main(cfg: DictConfig):
     for root, dirs, files in os.walk(root_directory):
         if generated:
             for file in files:
+                subsection = cfg.extract_label.get('dataset_subsection')
+                if subsection is not None and subsection not in root:
+                    continue
                 if file.endswith(file_ending):
-                    print(file)
-                    file_path = os.path.join(root, file)
-                    new_root = root.replace(dataset_name, new_dataset_name)
-                    new_root = new_root.replace('dataset-CACTS-generated', 'dataset-CACTS-generated/' + organ_name)
-                    new_root = new_root.replace('images', 'labels')
-                    new_root = '/'.join(new_root.split('/')[:-1])
-                    new_filename = file.replace('combined', organ_name)
-                    new_file_path = os.path.join(new_root, new_filename)
-                    extract_label(label, file_path, new_file_path)
+                    if multi_organ:
+                        file_path = os.path.join(root, file)
+                        new_root = root.replace(dataset_name, new_dataset_name)
+                        new_root = new_root.replace('dataset-CACTS-generated', 'dataset-CACTS-generated/' + organ_name)
+                        new_root = new_root.replace('images', 'labels')
+                        new_root = '/'.join(new_root.split('/')[:-1])
+                        new_filename = file.replace('combined', organ_name)
+                        new_file_path = os.path.join(new_root, new_filename)
+                        extract_label(label, file_path, new_file_path)
+                    else:
+                        for organ_label in label:
+                            generated_organ_name = class_map.get(organ_label)
+                            file_path = os.path.join(root, file)
+                            new_root = root.replace(dataset_name, new_dataset_name)
+                            new_root = new_root.replace('dataset-CACTS-generated', 'dataset-CACTS-generated/' + generated_organ_name)
+                            new_root = new_root.replace('images', 'labels')
+                            new_root = '/'.join(new_root.split('/')[:-1])
+                            new_filename = file.replace('combined', generated_organ_name)
+                            new_file_path = os.path.join(new_root, new_filename)
+                            extract_label(organ_label, file_path, new_file_path)
         else:
             if multi_organ:
                 for file in files:

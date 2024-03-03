@@ -28,6 +28,8 @@ If you find our code or paper usful for your project, please consider citing:
 
 ## Install
 
+If outlier-detection environment was installed from the env.yml in the root directory you can skip if-net_env.yml installation.
+
 A linux system with cuda 9.0 is required for the project.
 
 The `if-net_env.yml` file contains all necessary python dependencies for the project.
@@ -50,14 +52,11 @@ cd ../libvoxelize/
 python setup.py build_ext --inplace
 cd ../..
 ```
-
-You might need to export the path.
-```
-export PYTHONPATH=“${PYTHONPATH}:/path/to/if-net”
-```
+In the following files change the path in the sys.path.append() line to your path to the data_processing directory: data_processing/create_voxel_off.py data_processing/voxels.py, 
+and to path to the if-net directory in data_processing/implicit_waterproofing.py file
 
 ## Data Preparation
-For Deep Feature Grids Network vertebrae crops of size 128x128x128 voxels are used.
+For Deep Feature Grids Network images of size 128x128x128 voxels are used. To prepare your dataset, use the scripts from preprocessing package.
 
 For all the following steps parameters are specified in ifnet_config.yaml file.
 
@@ -77,6 +76,14 @@ python data_processing/rename_voxel_off.py
 Training input points and the corresponding ground truth occupancy values are generated with
 ```
 python data_processing/boundary_sampling.py
+```
+If you want to use Perlin noise thresholding data augmentation, run the following command
+```
+python data_processing/deform_input.py
+```
+To create training, validation and test splits run the command
+```
+python data_processing/create_splits.py
 ```
 
 ## Training
@@ -105,7 +112,7 @@ The command
 ```
 python generate.py
 ```
-generates the reconstructions of the, during training unseen, test examples from ShapeNet into  the folder 
+generates the reconstructions of the, during training unseen, test examples from the dataset into  the folder 
 ```experiments/YOUR_EXPERIMENT/evaluation_CHECKPOINT_@256/generation```.
 You can choose the IF-Net model checkpoint in ifnet_config.yaml. Use the model with minimum validation error for this, 
 You can also choose the number of points that fit into GPU memory at once (400k for small GPU's) in the same file. Please also add all parameters set during training. 
@@ -129,10 +136,19 @@ python convert_to_nifti.py
 ## Evaluation
 Please follow the instructions in the evaluation folder.
 
+## Automated analysis
+To detect the outliers in any dataset you can use the trained model by running
+```
+python analyse_image.py
+```
+Pretrained models should be stored in the if-net/experiments/ folder and be named by a single number corresponding to the label of the organ the model was trained on in the TotalSegmentator dataset (dictionary with label: organ mapping is stored in preprocessing/map_to_binary.py). Each model's folder should contain checkpoints/ folder containing the desired checkpoint, val_min={checkpoint}.npy created during the training, and outlier_threshold.npy created during evaluation. Multiple models trained on different organs can be used at once for analysis of multiple organs in the input image. 
+
+Parameters should be specified in ifnet_config.yaml.
+
 ## Pretrained Models
 
-Pretrained models can be found [here](https://syncandshare.lrz.de/getlink/fi5aXe7ySo6B46ZzzBFYVt/).
-To run the reconstruction with downloaded models export folder called iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNet128Vox in experiments folder and specify the checkpoint number in the ifnet_config file.
+Pretrained models can be found [here](https://drive.google.com/drive/folders/1G4yvbw-ClqmgoQ3VOxddSx0gK_nTQLlo?usp=sharing).
+To run the reconstruction with downloaded models export folders named by organ label in experiments folder and specify the checkpoint number in the ifnet_config file or comment the checkpoint in the config and let the script use the optimal checkpoint specified in val_min={checkpoint}.npy file.
 
 
 ## License

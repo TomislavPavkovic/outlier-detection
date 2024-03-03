@@ -1,8 +1,6 @@
 import nibabel as nib
 import numpy as np
-import pandas as pd
 import os
-from scipy.ndimage import zoom
 from nilearn.image import resample_img
 import hydra
 from omegaconf import DictConfig

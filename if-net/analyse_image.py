@@ -92,7 +92,6 @@ def main(cfg: DictConfig):
                 dataset = voxelized_data.VoxelizedDataset(
                     cfg_generate.mode,
                     data_path=os.path.join(new_folder_name, str(organ_scan)),
-                    #split_file=cfg_general.split_file,
                     voxelized_pointcloud=cfg_general.pointcloud,
                     pointcloud_samples=cfg_general.pointcloud_samples,
                     res=cfg_general.resolution,
@@ -101,7 +100,7 @@ def main(cfg: DictConfig):
                     num_sample_points=100,
                     batch_size=1,
                     num_workers=0,
-                    single_image=True, #cfg_analyse.single_input,
+                    single_image=True,
                     augmented=False
                 )
 
@@ -131,8 +130,6 @@ def main(cfg: DictConfig):
 
                 out_path = f"{new_folder_name}/{organ_scan}_prediction"
                 input_label = f"{new_folder_name}/{organ_scan}.nii.gz"
-                if cfg_generate.single_image:
-                    out_path = cfg_generate.out_path
                 gen_iterator(out_path, dataset, gen, analysis=True)
                 voxelize(in_path=out_path, res=cfg_general.resolution, input_filename=cfg.voxelize.filename)
                 convert_to_nifti(res=cfg_general.resolution,
@@ -175,7 +172,8 @@ def main(cfg: DictConfig):
                 print('Error during evaluation on file: {}: {}'.format(input, error))
                 log_writer.writerow([input, 'evaluation', class_map.get(organ_scan), error])
 
-        shutil.rmtree(new_folder_name)
+        if cfg_analyse.delete_reconstructions:
+            shutil.rmtree(new_folder_name)
     output_file.close()
     log_file.close()
 
