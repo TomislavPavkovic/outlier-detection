@@ -12,25 +12,25 @@ All subfolders (preprocessing, evaluation, if-net) have their own README file wi
 
 Segmentation in medicine refers to the process of identifying and delineating specific structures or regions of interest within medical images, such as CT scans, MRI images, or X-rays. It involves the precise outlining or labeling of anatomical structures, tumors, organs, or tissues to separate them from the background or other structures. Medical image segmentation is crucial for accurate diagnosis, treatment planning, and quantitative analysis in various medical applications.
 
-For efficient biomarker selection automated segmentation of large epidemiological cohorts is essential since it’s difficult to manually verify a huge number of scans.
+For efficient biomarker selection, automated segmentation of large epidemiological cohorts is essential, since it’s difficult to manually verify a huge number of scans.
 
-To solve this problem as a part of the interdisciplinary project I tried to enhance the automated segmentation process through the utilization of Neural Implicit Representation techniques to learn the shape prior.
+To solve this problem, the goal of the project was to enhance the automated segmentation process through the utilization of Neural Implicit Representation techniques to learn the shape prior.
 
 ## Dataset
 
 The dataset used for this project consists of the TotalSegmentator project’s ground truth and its predictions, and the German national cohort’s predicted Abdomen segmentation.
-The dataset contains CT scans of human body, where each scan contains a few organ segmentations. All segmentations are 3d shapes with voxel size of 1.5 mm in all dimensions.
+The dataset contains CT scans of human body, where each scan contains a few organ segmentations. All segmentations are 3D shapes with voxel size of 1.5 mm in all dimensions. It consists of 4739 CT scans. 
 
 The biggest challenges with the dataset were: inconsistent organ labeling in datasets, inconsistent organ selection in scans, varying organ size and complexity, incomplete organs and bad segmentations.
 
-It consists of 4739 CT scans. In order to solve the inconsistent organ selection in the scans, and since it’s easier and more accurate to work with each organ independently the model was trained on individual organs chosen based on size, complexity and tissue type.
+In order to solve the inconsistent organ selection in the scans, and since it’s easier and more accurate to work with each organ independently, the model was trained on individual organs chosen based on size, complexity and tissue type.
 
 There are pretrained models available for right kindey, liver, pancreas and right hip [here](https://drive.google.com/drive/folders/1G4yvbw-ClqmgoQ3VOxddSx0gK_nTQLlo?usp=sharing).
 
 ## Solution
 
 To solve the outlier detection problem in this project, shape priors were used to incorporate prior knowledge about typical shapes of organs or structures.
-Shape reconstruction was used to obtain the ideal object shape. After the reconstruction, chosen metrics are calculated to compare the input and the reconstruction and determine the outliers based on the metrics score. This way it is possible to locate the defect by visually comparing the input and the reconstruction.
+Shape reconstruction is used to obtain the ideal object shape. After the reconstruction, chosen metrics are calculated to compare the input and the reconstruction and determine the outliers based on the metrics score. This way it is possible to locate the defect by visually comparing the input and the reconstruction.
 
 In order to reconstruct the ideal organ shape, Neural Implicit Representation model was used.
 Software for automatic analysis of CT scans compares the segmentation and the reconstruction using metrics like Dice score, Hausdorff distance, Average Surface Distance or Maximal Distance and setting a threshold for the outliers.
@@ -41,7 +41,7 @@ To start the training some preprocessing is needed. Extraction of the single org
 
 Incomplete organ segmentations are filtered out.
 
-Then the format needs to be converted from NIfTI to numpy array and the boundary sampling needs to be done.
+The format then needs to be converted from NIfTI to numpy array and the boundary sampling needs to be done.
 
 ## Data augmentation
 
@@ -54,21 +54,27 @@ Because the organ size varies it is more effective to add shapes only to the clo
 
 The third augmentation showed the best results and is recommended.
 
+![Data augmentation](data-augmentation.png)
+
 Since the Perlin noise generation is a time-consuming process it is done offline, meaning a deformed image is generated for each scan before the training.
 
 ## Reconstructions
 
 When comparing reconstructions with the input and the ground truth it is visible that the model successfully fixes both undersegmentation and oversegmentation. Even though it is not always perfectly reconstructed compared to the ground truth, it generally recognizes segmentation errors and deforms the part enough that it is later recognized as an outlier.
 
-For oversegmentation it is more successful with smaller deformations and deformations that are further away from the object.
+For oversegmentation, it is more successful with smaller deformations and deformations that are further away from the object.
 
-Reconstructions are usually better for the organs that have similar shape in every scan, for example bones, but the model performed resonably well for pancreas too, for which the segmentation shapes are very inconsistant acros the scans. 
+![Liver reconstruction](liver-reconstruction.png)
 
-Experiment with multi-organ segmentations was performed on the segmentations of ribs. Since the whole rib cage is very big and the resolution of the model’s input is limited to 128 voxels, segmentations had to be severely downscaled which made the bones pixelated or even detached on the thin parts. The model still managed to learn the general shape and in the example with a big hole in the rib cage, it noticed that the hole and added some shapes which don’t really complete the bones.
+Reconstructions are usually better for the organs that have a similar shape in every scan, for example, bones, but the model performed reasonably well for the pancreas too, for which the segmentation shapes are very inconsistent across the scans. 
+
+An experiment with multi-organ segmentations was performed on the segmentations of ribs. Since the whole rib cage is very big and the resolution of the model’s input is limited to 128 voxels, segmentations had to be severely downscaled which made the bones pixelated or even detached on the thin parts. The model still managed to learn the general shape and in the example with a big hole in the rib cage, it noticed that hole and added some shapes which don’t really complete the bones.
+
+![Ribs reconstruction](ribs-reconstruction.png)
 
 ## Metrics and outliers
 
-For the comparison of input and output Dice score, Average surface distance, 95% Hausdorff distance and Maximum distance were calculated but the Dice score showed the best differentiation between good and bad reconstructions which is why it is recommended for calculating the outlier threshold based on the certain percentage of worst dice scores. 
+For the comparison of input and output, Dice score, Average surface distance, 95% Hausdorff distance and Maximum distance were calculated but the Dice score showed the best differentiation between good and bad reconstructions which is why it is recommended for calculating the outlier threshold based on the certain percentage of worst dice scores. 
 
 ## Conclusions
 

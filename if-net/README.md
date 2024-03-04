@@ -60,7 +60,7 @@ For Deep Feature Grids Network images of size 128x128x128 voxels are used. To pr
 
 For all the following steps parameters are specified in ifnet_config.yaml file.
 
-As a first step you need to extract the needed data out of nifti format with the following command
+As a first step you need to extract the needed data out of NIfTI format with the following command
 ```
 python data_processing/voxelize_from_nifti.py
 ```
@@ -128,7 +128,7 @@ Output voxels are generate by running following command with output root folder 
 python voxelize.py
 ```
 
-To convert to nifti format you can run the following command with output root folder of previous generation, desired output folder and the original nifti dataset (ground truth) set as in ifnet_config.yaml. is_prediction parameter should be "True" only for automated predictions because of the different naming scheme.
+To convert to NIfTI format you can run the following command with output root folder of previous generation, desired output folder and the original NIfTI dataset (ground truth) set as in ifnet_config.yaml.
 ```
 python convert_to_nifti.py
 ```

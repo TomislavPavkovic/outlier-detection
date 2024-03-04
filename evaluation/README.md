@@ -5,6 +5,8 @@ hausdorff distance, and 95% hausdorff distance between two NIFTI files.
 It can be used to evaluate the model by comparing model's reconstructions and ground truth images, and to determine the outlier threshold.
 
 ## Installation
+If outlier-detection environment was installed from the env.yml in the root directory you can skip this env.yml installation.
+
 Create a new conda environment by **navigating to this directory** and executing the following command:
 ```shell
 conda env create --name evaluation --file=env.yaml

@@ -92,7 +92,7 @@ convert_to_nifti:
   output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation/nifties/'
   #unprocessed dataset folder (nifti format) of the dataset used for generate.py
   ground_truth: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
-  #should be True only for automated prediction because of the different naming scheme
+  #Not needed for the used dataset. Keep at False.
   is_prediction: False
   #generate samples for all available experiments
   generate_all: False
