@@ -52,8 +52,8 @@ cd ../libvoxelize/
 python setup.py build_ext --inplace
 cd ../..
 ```
-In the following files change the path in the sys.path.append() line to your path to the data_processing directory: data_processing/create_voxel_off.py data_processing/voxels.py, 
-and to path to the if-net directory in data_processing/implicit_waterproofing.py file
+In the following files change the path in the sys.path.append() line to your path to the data_processing directory: data_processing/create_voxel_off.py, data_processing/voxels.py,<br /> 
+and to path to the if-net directory in data_processing/implicit_waterproofing.py file.
 
 ## Data Preparation
 For Deep Feature Grids Network images of size 128x128x128 voxels are used. To prepare your dataset, use the scripts from preprocessing package.
