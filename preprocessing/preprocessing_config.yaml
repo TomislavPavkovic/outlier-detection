@@ -1,0 +1,42 @@
+adapt_size:
+  #directory containing organ images that need to be adapted
+  root_directory: "/home/tomislav/datasets-ct-test/dataset-CACTS/liver"
+  #the dataset_name string is replaced by new_dataset_name string in the path of new resized files, to separate the adapted images from original
+  dataset_name: "datasets-ct-test"
+  new_dataset_name: "datasets-ct-test-sized"
+  #size of the output in all 3 dimensions
+  resolution: 128
+
+count_files:
+  #folder from which the files are counted
+  root: "/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet"
+  #ending of path string needs to be same as fil_ending to be counted
+  file_ending: ".off"
+
+extract_label:
+  #folder containing original images
+  root_directory: "/home/tomislav/datasets-ct/dataset-CACTS/"
+  #the dataset_name string is replaced by new_dataset_name string in the path of new extracted files, to separate the extracted images from original
+  dataset_name: "datasets-ct"
+  new_dataset_name: "datasets-ct-extracted"
+  #labels of organs you want to extract. If multi_organ: True, all listed labels will be extracted together in one image.
+  #If multi_organ: False, listed labels will be extracted separately where each organ will be in it's own image.
+  #If generated: False and multi_organ: False, you can leave the labels array empty to extract all organs, otherwise it is necessary to list the labels.
+  labels: [5]
+  #used for naming of the folders in the dataset. 
+  #Not needed if generated: True and multi_organ: True or if generated: False and multi_organ: False, because organ name is extracted from map_to_binary.py or the excel file.
+  organ_name: 'liver'
+  #should be set to True if the data is generated using TotalSegmentator because of the folder structuring. It is dataset specific
+  generated: False
+  #should be set to True if we want to extract multiple organs together in the same image
+  multi_organ: False
+  #name of the dataset part we want to extract images from (for example '0037_totalsegmentator'). Set to None if you want to use whole dataset.
+  dataset_subsection: None
+  #only files where file name ends with specified ending are considered. Used for generated images to use only combined images.
+  file_ending: '.nii.gz'
+
+remove_files:
+  #folder from which the files are removed
+  root_directory: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet/'
+  #ending of path string needs to be same as fil_ending to be removed
+  file_ending: '.off'

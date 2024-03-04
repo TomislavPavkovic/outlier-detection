@@ -1,0 +1,115 @@
+# Those parameters are used by multiple scripts
+general:
+  pointcloud: False
+  pointcloud_samples: 3000
+  sample_distribution: [0.5, 0.5]
+  sample_sigmas: [0.1, 0.01]
+  data_path: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  split_file: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
+
+  resolution: 128
+  model: 'ShapeNetPoints'
+
+
+voxelize_from_nifti:
+  input: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
+  output: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  file_ending: '.nii.gz'
+
+
+create_voxel_off:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  unpackbits: True
+  min: -0.5
+  max: 0.5
+
+
+rename_voxel_off:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+
+
+boundary_sampling:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  #specifies standard deviations of the normally distributed displacements added onto surface samples.
+  sigmas: [0.1, 0.01]
+  sample_number: 100000
+
+deform_input:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  #threshold value for perlin noise thresholding is randomly selected from the range between the following values. 
+  #Validation augmentation threshold is calculated as a mean of the following values.
+  threshold_min: 0.65
+  threshold_max: 1
+
+create_splits:
+  root: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver-ifnet'
+  #tartget = output path
+  target: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver_splits.npz'
+  #train:validation:test ratio
+  splits_ratio: [0.8, 0.1, 0.1]
+
+train:
+  epochs: 1500
+  batch_size: 10
+  optimizer: 'Adam'
+  dropout_probability: 0
+  adam_weight_decay: 1e-5
+  learning_rate: 1e-4
+  augmented: True
+
+
+generate:
+  decoder_hidden_dim: 256
+  mode: 'test'
+  retrieval_resolution: 256
+  #model checkpoint used for generation, the one with lowest validation loss is specified in filename val_min=***.npy in the experiment folder
+  checkpoint: 57
+  #choose the number of points that fit into GPU memory at once (400k for small GPU's)
+  batch_points: 500000
+  #choose if training during inference should be enabled
+  training_during_inference: False
+  #generate samples for all available experiments
+  generate_all: False
+  #generate a single reconstruction
+  single_image: False
+  #needed if single_image = True, specify only the folder where the reconstruction should be saved and not the actual file name
+  out_path: '/home/tomislav'
+
+
+voxelize:
+  #root folder of the generate.py output
+  root: '/home/tomislav/outlier-detection/if-net/experiments/'
+  #filename of voxelize.py output (default: surface_reconstruction.off)
+  filename: 'surface_reconstruction.off'
+  #generate samples for all available experiments
+  generate_all: True
+
+
+convert_to_nifti:
+  #root folder of the generate.py output
+  input: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation'
+  #folder where generated nifti files will be saved
+  output: '/home/tomislav/outlier-detection/if-net/experiments/iVoxels_dist-0.5_0.5_sigmas-0.1_0.01_v128_mShapeNetPoints/evaluation_57_@256/generation/nifties/'
+  #unprocessed dataset folder (nifti format) of the dataset used for generate.py
+  ground_truth: '/home/tomislav/datasets-ct-test-sized/dataset-CACTS/liver'
+  #should be True only for automated prediction because of the different naming scheme
+  is_prediction: False
+  #generate samples for all available experiments
+  generate_all: False
+
+
+analyse:
+  #if input is folder, it uses all nifti images in the folder and all subfolders recursively as inputs
+  input: '/home/tomislav/datasets-ct/dataset-CACTS-generated'
+  #folder containing trained models folder with a folder structure as described in readme file
+  models_path: '/home/tomislav/outlier-detection/experiments'
+  #checkpoint should be specified only if same checkpoint from all the models should be used
+  #if it's None or commented, optimal checkpoint value stored in model's folder will be used
+  #checkpoint: 187
+  output_path: '/home/tomislav/outliers.csv'
+  #log file contains files and error messages for the failed analysis runs
+  log_path: '/home/tomislav/outliers_log.csv'
+  #choose one or more metrics for outlier detection: 'dice score', 'average surface distance', '95% hausdorff distance', 'maximal surface distance'
+  metrics: ['dice score']
+  #choose if you want to delete the reconstructions used for outlier detection
+  delete_reconstructions: True
